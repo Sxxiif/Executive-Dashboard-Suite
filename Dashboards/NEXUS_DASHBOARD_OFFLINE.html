@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS — Executive Intelligence Platform</title>
+<script src="lib/xlsx.full.min.js"></script>
+<script src="lib/chart.umd.js"></script>
+<style>
+@import url('lib/fonts.css');
+
+:root{
+  --bg:#070a12;
+  --bg-grad-1:#0a0e1a;
+  --bg-grad-2:#080b14;
+  --panel:#0e131f;
+  --panel-2:#121826;
+  --panel-3:#161d2e;
+  --elevated:#1a2236;
+  --line:rgba(148,170,210,0.08);
+  --line-2:rgba(148,170,210,0.14);
+  --line-bright:rgba(99,179,237,0.3);
+  --txt:#eef2fb;
+  --txt-2:#9aa8c4;
+  --txt-3:#5d6b8a;
+  --txt-4:#3d4860;
+  --accent:#5b9dff;
+  --accent-2:#3d7fe6;
+  --accent-glow:rgba(91,157,255,0.15);
+  --teal:#2dd6b8;
+  --violet:#9d7bff;
+  --gold:#f5c451;
+  --rose:#ff6b8a;
+  --emerald:#34e0a1;
+  --amber:#ffb443;
+  --red:#ff5a72;
+  --cyan:#46d5ff;
+  --font:'Sora',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --serif:'Instrument Serif',serif;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:22px;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);
+  --shadow-lg:0 12px 48px rgba(0,0,0,0.55);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg)}
+body{font-family:var(--font);background:radial-gradient(ellipse 120% 80% at 50% -10%,var(--bg-grad-1),var(--bg) 60%);color:var(--txt);min-height:100vh;font-size:14px;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;z-index:0;background-image:radial-gradient(circle at 15% 20%,rgba(91,157,255,0.05),transparent 35%),radial-gradient(circle at 85% 70%,rgba(157,123,255,0.04),transparent 40%);pointer-events:none}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:10px}::-webkit-scrollbar-thumb:hover{background:var(--txt-4)}
+
+/* ── LANDING / DROP ── */
+#landing{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse 100% 70% at 50% 0%,#0c1322,var(--bg) 55%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;overflow:hidden}
+#landing.hidden{display:none}
+.landing-orb{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,var(--accent-glow),transparent 70%);top:-200px;filter:blur(40px);animation:float 8s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(30px) scale(1.05)}}
+.landing-mark{position:relative;z-index:2;text-align:center;margin-bottom:48px}
+.landing-logo{font-family:var(--font);font-size:62px;font-weight:800;letter-spacing:-3px;background:linear-gradient(135deg,#fff 20%,var(--accent) 60%,var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.landing-logo .dot{color:var(--accent);-webkit-text-fill-color:var(--accent)}
+.landing-tag{font-family:var(--mono);font-size:12px;letter-spacing:6px;color:var(--txt-3);margin-top:14px;text-transform:uppercase}
+.landing-serif{font-family:var(--serif);font-style:italic;font-size:20px;color:var(--txt-2);margin-top:18px;font-weight:400}
+.drop-zone{position:relative;z-index:2;width:520px;max-width:90vw;padding:48px 40px;border:1.5px dashed var(--line-2);border-radius:var(--r-xl);display:flex;flex-direction:column;align-items:center;gap:18px;cursor:pointer;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);background:rgba(14,19,31,0.5);backdrop-filter:blur(20px)}
+.drop-zone:hover,.drop-zone.over{border-color:var(--accent);background:rgba(91,157,255,0.06);box-shadow:0 0 60px var(--accent-glow);transform:translateY(-2px)}
+.drop-ring{width:64px;height:64px;border-radius:50%;border:2px solid var(--line-2);display:flex;align-items:center;justify-content:center;position:relative;transition:all 0.3s}
+.drop-zone:hover .drop-ring{border-color:var(--accent);box-shadow:0 0 30px var(--accent-glow)}
+.drop-ring svg{width:28px;height:28px;stroke:var(--accent);fill:none;stroke-width:1.8}
+.drop-h{font-size:17px;font-weight:600;color:var(--txt);letter-spacing:-0.3px}
+.drop-p{font-family:var(--mono);font-size:11px;color:var(--txt-3);text-align:center;line-height:1.8}
+.drop-p b{color:var(--accent);font-weight:500}
+.btn-primary{font-family:var(--font);font-size:13px;font-weight:600;letter-spacing:0.3px;color:#06121f;background:linear-gradient(135deg,#fff,var(--accent));border:none;padding:11px 26px;cursor:pointer;border-radius:var(--r-md);transition:all 0.25s;box-shadow:0 4px 20px var(--accent-glow)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 28px var(--accent-glow)}
+#file-input{display:none}
+.btn-ghost{position:relative;z-index:2;font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--txt-3);background:transparent;border:1px solid var(--line-2);padding:9px 20px;cursor:pointer;border-radius:var(--r-md);margin-top:24px;transition:all 0.25s;text-transform:uppercase}
+.btn-ghost:hover{color:var(--txt);border-color:var(--line-bright);background:rgba(91,157,255,0.04)}
+.drop-err{position:relative;z-index:2;font-family:var(--mono);font-size:11px;color:var(--red);min-height:16px;margin-top:14px}
+.landing-credit{position:absolute;bottom:28px;z-index:2;font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--txt-4);text-transform:uppercase}
+.landing-credit b{color:var(--gold);font-weight:600}
+
+/* ── TOP BAR ── */
+.topbar{position:sticky;top:0;z-index:500;background:rgba(7,10,18,0.72);backdrop-filter:blur(24px) saturate(140%);border-bottom:1px solid var(--line);padding:0 28px;height:68px;display:flex;align-items:center;justify-content:space-between}
+.tb-left{display:flex;align-items:center;gap:22px}
+.tb-logo{font-family:var(--font);font-size:22px;font-weight:800;letter-spacing:-1px;color:var(--txt);display:flex;align-items:center;gap:1px}
+.tb-logo .dot{color:var(--accent)}
+.tb-logo small{font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--txt-3);font-weight:400;display:block;margin-top:-2px}
+.tb-divider{width:1px;height:26px;background:var(--line-2)}
+.tb-nav{display:flex;gap:4px}
+.tb-nav button{font-family:var(--font);font-size:13px;font-weight:500;color:var(--txt-3);background:transparent;border:none;padding:8px 14px;cursor:pointer;border-radius:var(--r-sm);transition:all 0.2s}
+.tb-nav button.active{color:var(--txt);background:var(--panel-2)}
+.tb-nav button:hover:not(.active){color:var(--txt-2)}
+.tb-center{position:absolute;left:50%;transform:translateX(-50%);text-align:center}
+.tb-clock{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--txt);letter-spacing:1px}
+.tb-date{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--txt-3);margin-top:1px;text-transform:uppercase}
+.tb-right{display:flex;align-items:center;gap:14px}
+.tb-status{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;color:var(--txt-2);letter-spacing:0.5px;padding:6px 12px;background:rgba(52,224,161,0.08);border:1px solid rgba(52,224,161,0.18);border-radius:100px}
+.tb-status .dot{width:6px;height:6px;border-radius:50%;background:var(--emerald);box-shadow:0 0 8px var(--emerald);animation:pulse 2.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.35}}
+.tb-btn{font-family:var(--font);font-size:12px;font-weight:500;color:var(--txt-2);background:var(--panel-2);border:1px solid var(--line);padding:8px 14px;cursor:pointer;border-radius:var(--r-sm);transition:all 0.2s;display:flex;align-items:center;gap:6px}
+.tb-btn:hover{color:var(--txt);border-color:var(--line-2);background:var(--panel-3)}
+.tb-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+.tb-credit{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--txt-4)}
+.tb-credit b{color:var(--gold);font-weight:600}
+
+/* ── MAIN ── */
+.wrap{position:relative;z-index:1;max-width:1840px;margin:0 auto;padding:24px 28px 40px}
+.section-head{display:flex;align-items:center;gap:14px;margin:8px 0 16px}
+.section-head h2{font-family:var(--font);font-size:13px;font-weight:600;letter-spacing:0.5px;color:var(--txt-2);text-transform:uppercase}
+.section-head .rule{flex:1;height:1px;background:linear-gradient(90deg,var(--line-2),transparent)}
+.section-head .meta{font-family:var(--mono);font-size:10px;color:var(--txt-4);letter-spacing:1px}
+
+/* ── GRID ── */
+.grid{display:grid;gap:16px;margin-bottom:24px}
+.g-6{grid-template-columns:repeat(6,1fr)}
+.g-3{grid-template-columns:repeat(3,1fr)}
+.g-2{grid-template-columns:1fr 1fr}
+.g-2l{grid-template-columns:1.6fr 1fr}
+.g-2r{grid-template-columns:1fr 1.6fr}
+.g-1{grid-template-columns:1fr}
+.stack{display:flex;flex-direction:column;gap:16px}
+
+/* ── VIEW HERO ── */
+.view-hero{display:flex;align-items:flex-end;justify-content:space-between;margin:8px 0 24px;padding-bottom:20px;border-bottom:1px solid var(--line);animation:fadeUp 0.5s cubic-bezier(0.4,0,0.2,1)}
+.view-title{font-family:var(--font);font-size:34px;font-weight:800;letter-spacing:-1.5px;color:var(--txt);line-height:1;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.view-sub{font-family:var(--font);font-size:14px;color:var(--txt-3);font-weight:300;margin-top:8px}
+.view-meta{font-family:var(--mono);font-size:10px;color:var(--txt-4);letter-spacing:2px;padding:6px 14px;background:var(--panel-2);border:1px solid var(--line);border-radius:100px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── STAT TILE ── */
+.stat-tile{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;position:relative;overflow:hidden;animation:fadeUp 0.5s cubic-bezier(0.4,0,0.2,1) backwards}
+.stat-tile-bar{position:absolute;top:0;left:0;right:0;height:2px}
+.stat-tile-l{font-family:var(--mono);font-size:9px;color:var(--txt-3);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.stat-tile-v{font-family:var(--font);font-size:32px;font-weight:800;letter-spacing:-1.5px;line-height:1}
+.stat-tile-s{font-family:var(--mono);font-size:10px;color:var(--txt-4);margin-top:6px}
+
+/* ── FOOTER NAV ── */
+.view-foot-nav{display:flex;justify-content:space-between;gap:16px;margin-top:28px;padding-top:24px;border-top:1px solid var(--line)}
+.vnav-btn{display:flex;align-items:center;gap:12px;background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 20px;cursor:pointer;transition:all 0.25s;color:var(--txt-2)}
+.vnav-btn:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow-lg);color:var(--txt)}
+.vnav-btn.next{text-align:right}
+.vnav-btn svg{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:2;flex-shrink:0}
+.vnav-dir{font-family:var(--mono);font-size:9px;color:var(--txt-4);letter-spacing:1px;text-transform:uppercase}
+.vnav-name{font-family:var(--font);font-size:15px;font-weight:600;color:var(--txt);margin-top:2px}
+
+/* ── PANEL / CARD ── */
+.panel{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;position:relative;transition:all 0.3s cubic-bezier(0.4,0,0.2,1)}
+.panel::after{content:'';position:absolute;inset:0;border-radius:var(--r-lg);padding:1px;background:linear-gradient(180deg,rgba(148,170,210,0.1),transparent 40%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.panel:hover{border-color:var(--line-2);box-shadow:var(--shadow)}
+.panel.tap{cursor:pointer}
+.panel.tap:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.p-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.p-title{display:flex;align-items:center;gap:10px}
+.p-title .ic{width:30px;height:30px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.p-title .ic svg{width:16px;height:16px;stroke-width:1.8;fill:none}
+.p-title h3{font-family:var(--font);font-size:14px;font-weight:600;color:var(--txt);letter-spacing:-0.2px}
+.p-title .sub{font-family:var(--mono);font-size:9px;color:var(--txt-3);letter-spacing:1px;text-transform:uppercase;margin-top:1px}
+.chip{font-family:var(--mono);font-size:10px;font-weight:500;padding:4px 10px;border-radius:100px;letter-spacing:0.5px}
+.chip-row{display:flex;gap:6px}
+.c-emerald{background:rgba(52,224,161,0.1);color:var(--emerald);border:1px solid rgba(52,224,161,0.2)}
+.c-amber{background:rgba(255,180,67,0.1);color:var(--amber);border:1px solid rgba(255,180,67,0.2)}
+.c-red{background:rgba(255,90,114,0.1);color:var(--red);border:1px solid rgba(255,90,114,0.2)}
+.c-accent{background:rgba(91,157,255,0.1);color:var(--accent);border:1px solid rgba(91,157,255,0.2)}
+.c-gold{background:rgba(245,196,81,0.1);color:var(--gold);border:1px solid rgba(245,196,81,0.2)}
+.c-violet{background:rgba(157,123,255,0.1);color:var(--violet);border:1px solid rgba(157,123,255,0.2)}
+.c-teal{background:rgba(45,214,184,0.1);color:var(--teal);border:1px solid rgba(45,214,184,0.2)}
+.c-mute{background:rgba(148,170,210,0.06);color:var(--txt-3);border:1px solid var(--line)}
+
+/* ── KPI ── */
+.kpi{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;position:relative;overflow:hidden;cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1)}
+.kpi:hover{transform:translateY(-3px);border-color:var(--line-2);box-shadow:var(--shadow-lg)}
+.kpi-glow{position:absolute;top:-30px;right:-30px;width:90px;height:90px;border-radius:50%;opacity:0.12;filter:blur(20px)}
+.kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.kpi-ic{width:34px;height:34px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center}
+.kpi-ic svg{width:17px;height:17px;stroke-width:1.8;fill:none}
+.kpi-spark{width:54px;height:24px}
+.kpi-lbl{font-family:var(--mono);font-size:10px;color:var(--txt-3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.kpi-val{font-family:var(--font);font-size:30px;font-weight:700;line-height:1;letter-spacing:-1px;margin-bottom:8px}
+.kpi-foot{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px}
+.kpi-delta{display:flex;align-items:center;gap:3px;font-weight:600;padding:2px 7px;border-radius:100px}
+.kpi-delta.up{color:var(--emerald);background:rgba(52,224,161,0.1)}
+.kpi-delta.dn{color:var(--red);background:rgba(255,90,114,0.1)}
+.kpi-delta.nt{color:var(--txt-3);background:rgba(148,170,210,0.06)}
+.kpi-foot .ctx{color:var(--txt-3)}
+/* ── PROGRESS ── */
+.bar{margin-bottom:11px}
+.bar-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.bar-lbl{font-family:var(--font);font-size:12px;color:var(--txt-2);font-weight:400}
+.bar-val{font-family:var(--mono);font-size:11px;color:var(--txt);font-weight:600}
+.bar-track{height:6px;background:rgba(148,170,210,0.07);border-radius:100px;overflow:hidden;position:relative}
+.bar-fill{height:100%;border-radius:100px;position:relative;transition:width 1.4s cubic-bezier(0.4,0,0.2,1)}
+.bar-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:30%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3))}
+
+/* ── DONUT WRAP ── */
+.donut-wrap{display:flex;align-items:center;gap:20px;margin-bottom:18px}
+.donut-canvas{position:relative;flex-shrink:0}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-center .big{font-family:var(--font);font-size:22px;font-weight:700;letter-spacing:-1px}
+.donut-center .sm{font-family:var(--mono);font-size:8px;color:var(--txt-3);letter-spacing:1px;text-transform:uppercase;margin-top:1px}
+.legend{flex:1;display:flex;flex-direction:column;gap:9px}
+.leg-row{display:flex;align-items:center;gap:9px}
+.leg-dot{width:8px;height:8px;border-radius:3px;flex-shrink:0}
+.leg-lbl{font-family:var(--font);font-size:12px;color:var(--txt-2)}
+.leg-val{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--txt);font-weight:600}
+.leg-val small{color:var(--txt-3);font-weight:400}
+
+/* ── PRESENCE ── */
+.presence{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:14px}
+.pcell{background:var(--panel-3);border:1px solid var(--line);border-radius:var(--r-md);padding:13px 14px;position:relative;overflow:hidden;transition:all 0.2s}
+.pcell:hover{border-color:var(--line-2);transform:translateY(-1px)}
+.pcell-bar{position:absolute;left:0;top:0;bottom:0;width:3px}
+.pcell-v{font-family:var(--font);font-size:22px;font-weight:700;line-height:1;letter-spacing:-1px}
+.pcell-l{font-family:var(--mono);font-size:9px;color:var(--txt-3);letter-spacing:0.5px;text-transform:uppercase;margin-top:5px}
+
+/* ── MINI STAT ── */
+.mini-row{display:flex;gap:9px;margin-top:14px}
+.mini{flex:1;background:var(--panel-3);border:1px solid var(--line);border-radius:var(--r-md);padding:11px;text-align:center;border-top-width:2px}
+.mini-v{font-family:var(--font);font-size:18px;font-weight:700;letter-spacing:-0.5px}
+.mini-l{font-family:var(--mono);font-size:8px;color:var(--txt-3);letter-spacing:0.5px;text-transform:uppercase;margin-top:3px}
+
+/* ── LIST ROW (mission/task) ── */
+.lrow{display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:var(--r-md);cursor:pointer;transition:all 0.2s;margin:0 -10px}
+.lrow:hover{background:var(--panel-3)}
+.lrow+.lrow{border-top:1px solid var(--line)}
+.avatar{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:12px;font-weight:600;flex-shrink:0;letter-spacing:-0.5px}
+.lrow-main{flex:1;min-width:0}
+.lrow-t{font-family:var(--font);font-size:13px;font-weight:500;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow-s{font-family:var(--mono);font-size:10px;color:var(--txt-3);margin-top:2px}
+.lrow-tag{flex-shrink:0}
+
+/* ── TASK BAR INDICATOR ── */
+.tdot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* ── RAG GRID ── */
+.rag{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.ragc{background:var(--panel-3);border:1px solid var(--line);border-radius:var(--r-md);padding:13px 14px;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden}
+.ragc:hover{border-color:var(--line-2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.ragc-glow{position:absolute;top:0;left:0;right:0;height:2px}
+.ragc-n{font-family:var(--font);font-size:12px;font-weight:600;color:var(--txt);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ragc-s{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.ragc-s .d{width:7px;height:7px;border-radius:50%}
+.ragc-s span{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.5px;text-transform:uppercase}
+.ragc-stats{display:flex;gap:10px}
+.ragc-stats div{font-family:var(--mono);font-size:9px;color:var(--txt-4);text-transform:uppercase;letter-spacing:0.5px}
+.ragc-stats strong{display:block;font-family:var(--font);font-size:14px;color:var(--txt-2);font-weight:600;margin-bottom:1px}
+
+/* ── DECISIONS ── */
+.dec{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--panel-3);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:8px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.dec:hover{border-color:var(--line-2);transform:translateX(2px)}
+.dec-bar{position:absolute;left:0;top:0;bottom:0;width:3px}
+.dec-ic{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dec-ic svg{width:15px;height:15px;stroke-width:1.8;fill:none}
+.dec-main{flex:1;min-width:0}
+.dec-type{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;font-weight:600;margin-bottom:2px}
+.dec-t{font-family:var(--font);font-size:13px;font-weight:500;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dec-meta{text-align:right;flex-shrink:0}
+.dec-owner{font-family:var(--mono);font-size:10px;color:var(--txt-3)}
+.dec-age{font-family:var(--font);font-size:13px;font-weight:700;margin-top:2px}
+.dec-foot{display:flex;align-items:center;gap:14px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10px}
+.dec-foot .leg{display:flex;align-items:center;gap:5px;color:var(--txt-3)}
+.dec-foot .leg .d{width:6px;height:6px;border-radius:50%}
+
+/* ── RISK ── */
+.risk{display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:var(--r-md);cursor:pointer;transition:all 0.2s;margin:0 -10px}
+.risk:hover{background:var(--panel-3)}
+.risk+.risk{border-top:1px solid var(--line)}
+.risk-score{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:16px;font-weight:700;flex-shrink:0}
+.risk-main{flex:1;min-width:0}
+.risk-t{font-family:var(--font);font-size:13px;font-weight:500;color:var(--txt)}
+.risk-s{font-family:var(--mono);font-size:10px;color:var(--txt-3);margin-top:2px}
+.risk-lvl{flex-shrink:0;text-align:right}
+.risk-lvl .lv{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.5px}
+.risk-lvl .tk{width:60px;height:4px;background:rgba(148,170,210,0.1);border-radius:100px;margin-top:5px;overflow:hidden}
+.risk-lvl .tk div{height:100%;border-radius:100px}
+
+/* ── UTILIZATION ── */
+.util{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.ucol{background:var(--panel-3);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 10px;text-align:center}
+.ucol-n{font-family:var(--mono);font-size:9px;color:var(--txt-3);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:9px}
+.ucol-bar{height:52px;width:100%;background:rgba(148,170,210,0.06);border-radius:var(--r-sm);position:relative;overflow:hidden;margin-bottom:8px}
+.ucol-fill{position:absolute;bottom:0;left:0;right:0;border-radius:var(--r-sm);transition:height 1.4s cubic-bezier(0.4,0,0.2,1)}
+.ucol-v{font-family:var(--font);font-size:15px;font-weight:700;letter-spacing:-0.5px}
+.ucol-st{font-family:var(--mono);font-size:8px;letter-spacing:0.5px;text-transform:uppercase;margin-top:2px}
+
+/* ── SYSTEM ── */
+.sys{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.sys:last-child{border-bottom:none}
+.sys-l{display:flex;align-items:center;gap:9px;font-family:var(--font);font-size:12px;color:var(--txt-2)}
+.sys-l .dot{width:7px;height:7px;border-radius:50%}
+.sys-v{font-family:var(--mono);font-size:11px;font-weight:600}
+
+/* ── ANNOUNCEMENT ── */
+.ann{padding:13px 15px;background:var(--panel-3);border:1px solid var(--line);border-left-width:3px;border-radius:var(--r-md);margin-bottom:9px}
+.ann-t{font-family:var(--font);font-size:13px;font-weight:600;color:var(--txt);margin-bottom:4px}
+.ann-b{font-family:var(--font);font-size:12px;color:var(--txt-2);line-height:1.55;font-weight:300}
+.ann-m{font-family:var(--mono);font-size:9px;color:var(--txt-4);letter-spacing:0.5px;margin-top:7px;text-transform:uppercase}
+
+/* ── PIPELINE ── */
+.pipe{display:flex;gap:5px;margin-bottom:16px}
+.pipe-s{flex:1;text-align:center;padding:13px 6px;background:var(--panel-3);border:1px solid var(--line);border-radius:var(--r-md);position:relative;transition:all 0.2s}
+.pipe-s:hover{border-color:var(--line-2)}
+.pipe-v{font-family:var(--font);font-size:20px;font-weight:700;letter-spacing:-1px}
+.pipe-l{font-family:var(--mono);font-size:8px;color:var(--txt-3);letter-spacing:0.5px;text-transform:uppercase;margin-top:3px}
+
+/* ── EVENTS ── */
+.ev{display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid var(--line)}
+.ev:last-child{border-bottom:none}
+.ev-date{width:46px;height:46px;flex-shrink:0;background:var(--panel-3);border:1px solid var(--line);border-radius:var(--r-md);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ev-d{font-family:var(--font);font-size:17px;font-weight:700;line-height:1;letter-spacing:-1px}
+.ev-mo{font-family:var(--mono);font-size:8px;color:var(--txt-3);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.ev-main{flex:1}
+.ev-t{font-family:var(--font);font-size:13px;font-weight:500;color:var(--txt)}
+.ev-s{font-family:var(--mono);font-size:10px;color:var(--txt-3);margin-top:2px}
+
+/* ── SLIDE PANEL ── */
+#drawer{position:fixed;top:0;right:-560px;width:560px;max-width:92vw;height:100vh;background:linear-gradient(180deg,#0c1120,var(--panel));border-left:1px solid var(--line-2);z-index:9000;transition:right 0.45s cubic-bezier(0.4,0,0.2,1);overflow-y:auto;box-shadow:-20px 0 60px rgba(0,0,0,0.5)}
+#drawer.open{right:0}
+.dw-head{padding:26px 28px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(12,17,32,0.95);backdrop-filter:blur(20px);z-index:1;display:flex;align-items:flex-start;justify-content:space-between}
+.dw-title{font-family:var(--font);font-size:18px;font-weight:700;color:var(--txt);letter-spacing:-0.5px}
+.dw-sub{font-family:var(--mono);font-size:10px;color:var(--txt-3);letter-spacing:1.5px;margin-top:4px;text-transform:uppercase}
+.dw-close{width:34px;height:34px;border-radius:var(--r-sm);background:var(--panel-3);border:1px solid var(--line);color:var(--txt-2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0}
+.dw-close:hover{background:rgba(255,90,114,0.1);border-color:rgba(255,90,114,0.3);color:var(--red)}
+.dw-close svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none}
+.dw-body{padding:24px 28px 40px}
+.dw-sec{margin-bottom:26px}
+.dw-sec-t{font-family:var(--mono);font-size:10px;color:var(--txt-4);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.dw-stat{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(148,170,210,0.05)}
+.dw-stat:last-child{border-bottom:none}
+.dw-stat-l{font-family:var(--font);font-size:13px;color:var(--txt-2);font-weight:300}
+.dw-stat-v{font-family:var(--mono);font-size:13px;color:var(--txt);font-weight:600}
+.dw-stat-v.g{color:var(--emerald)}.dw-stat-v.a{color:var(--amber)}.dw-stat-v.r{color:var(--red)}.dw-stat-v.c{color:var(--accent)}
+.dw-note{padding:14px 16px;border-radius:var(--r-md);font-family:var(--font);font-size:12px;line-height:1.6;font-weight:300}
+.dw-note.r{background:rgba(255,90,114,0.08);border:1px solid rgba(255,90,114,0.2);color:var(--rose)}
+.dw-note.a{background:rgba(255,180,67,0.08);border:1px solid rgba(255,180,67,0.2);color:var(--amber)}
+.dw-item{padding:12px 0;border-bottom:1px solid rgba(148,170,210,0.05)}
+.dw-item:last-child{border-bottom:none}
+.dw-item-t{font-family:var(--font);font-size:13px;font-weight:500;color:var(--txt)}
+.dw-item-m{display:flex;gap:8px;margin-top:4px;font-family:var(--mono);font-size:10px;color:var(--txt-3)}
+
+#scrim{position:fixed;inset:0;background:rgba(5,8,15,0.65);backdrop-filter:blur(3px);z-index:8999;opacity:0;pointer-events:none;transition:opacity 0.35s}
+#scrim.on{opacity:1;pointer-events:all}
+/* ── AI ASSISTANT ── */
+#ai-fab{position:fixed;bottom:28px;right:28px;z-index:7000;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--violet));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px var(--accent-glow),0 0 0 1px rgba(255,255,255,0.1) inset;transition:all 0.3s cubic-bezier(0.4,0,0.2,1)}
+#ai-fab:hover{transform:scale(1.08) translateY(-2px);box-shadow:0 12px 44px var(--accent-glow)}
+#ai-fab svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:1.8}
+#ai-fab .ai-pulse{position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--accent);opacity:0;animation:aipulse 3s infinite}
+@keyframes aipulse{0%{transform:scale(1);opacity:0.6}100%{transform:scale(1.4);opacity:0}}
+
+#ai-panel{position:fixed;bottom:100px;right:28px;z-index:7000;width:420px;max-width:92vw;height:600px;max-height:78vh;background:linear-gradient(180deg,#0c1120,var(--panel));border:1px solid var(--line-2);border-radius:var(--r-xl);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;opacity:0;transform:translateY(20px) scale(0.96);pointer-events:none;transition:all 0.35s cubic-bezier(0.4,0,0.2,1);overflow:hidden}
+#ai-panel.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all}
+.ai-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:rgba(12,17,32,0.6)}
+.ai-head-l{display:flex;align-items:center;gap:11px}
+.ai-orb{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--violet));display:flex;align-items:center;justify-content:center;position:relative}
+.ai-orb svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:1.8}
+.ai-head h4{font-family:var(--font);font-size:15px;font-weight:700;color:var(--txt);letter-spacing:-0.3px}
+.ai-head .st{font-family:var(--mono);font-size:9px;color:var(--emerald);letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:5px;margin-top:1px}
+.ai-head .st .d{width:5px;height:5px;border-radius:50%;background:var(--emerald);box-shadow:0 0 6px var(--emerald)}
+.ai-close{width:30px;height:30px;border-radius:var(--r-sm);background:var(--panel-3);border:1px solid var(--line);color:var(--txt-3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.ai-close:hover{color:var(--txt);background:var(--elevated)}
+.ai-close svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
+.ai-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+.ai-msg{display:flex;gap:10px;max-width:90%}
+.ai-msg.user{align-self:flex-end;flex-direction:row-reverse}
+.ai-msg-av{width:28px;height:28px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.ai-msg.bot .ai-msg-av{background:linear-gradient(135deg,var(--accent),var(--violet))}
+.ai-msg.bot .ai-msg-av svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:1.8}
+.ai-msg.user .ai-msg-av{background:var(--panel-3);border:1px solid var(--line);font-family:var(--font);font-size:11px;font-weight:600;color:var(--txt-2)}
+.ai-bubble{padding:12px 15px;border-radius:var(--r-md);font-family:var(--font);font-size:13px;line-height:1.6;font-weight:300}
+.ai-msg.bot .ai-bubble{background:var(--panel-3);border:1px solid var(--line);color:var(--txt);border-top-left-radius:3px}
+.ai-msg.user .ai-bubble{background:linear-gradient(135deg,var(--accent-2),var(--accent));color:#fff;border-top-right-radius:3px;font-weight:400}
+.ai-bubble b{font-weight:600;color:var(--accent)}
+.ai-msg.user .ai-bubble b{color:#fff}
+.ai-bubble .data-hl{font-family:var(--mono);font-weight:600;color:var(--txt)}
+.ai-bubble .metric{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:12px;font-weight:600;padding:1px 7px;border-radius:6px;background:rgba(91,157,255,0.12);color:var(--accent);margin:0 1px}
+.ai-bubble ul{margin:8px 0 2px;padding-left:4px;list-style:none}
+.ai-bubble li{padding:4px 0;display:flex;gap:8px;align-items:flex-start;font-size:12.5px}
+.ai-bubble li .li-dot{color:var(--accent);flex-shrink:0;margin-top:1px}
+.ai-suggest{padding:14px 20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:7px;background:rgba(12,17,32,0.4)}
+.ai-chip{font-family:var(--font);font-size:11px;font-weight:400;color:var(--txt-2);background:var(--panel-3);border:1px solid var(--line);padding:7px 12px;border-radius:100px;cursor:pointer;transition:all 0.2s}
+.ai-chip:hover{color:var(--txt);border-color:var(--accent);background:rgba(91,157,255,0.08)}
+.ai-input-row{padding:14px 16px;border-top:1px solid var(--line);display:flex;gap:9px;align-items:center;background:rgba(12,17,32,0.6)}
+.ai-input{flex:1;font-family:var(--font);font-size:13px;color:var(--txt);background:var(--panel-3);border:1px solid var(--line);border-radius:var(--r-md);padding:11px 14px;outline:none;transition:all 0.2s}
+.ai-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.ai-input::placeholder{color:var(--txt-4)}
+.ai-send{width:42px;height:42px;border-radius:var(--r-md);background:linear-gradient(135deg,var(--accent),var(--accent-2));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s}
+.ai-send:hover{transform:scale(1.05)}
+.ai-send svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2}
+.ai-typing{display:flex;gap:4px;padding:4px 0}
+.ai-typing span{width:7px;height:7px;border-radius:50%;background:var(--txt-3);animation:typing 1.4s infinite}
+.ai-typing span:nth-child(2){animation-delay:0.2s}
+.ai-typing span:nth-child(3){animation-delay:0.4s}
+@keyframes typing{0%,60%,100%{opacity:0.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+
+/* ── FOOTER ── */
+.footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;max-width:1840px;margin:0 auto}
+.footer-l{font-family:var(--mono);font-size:10px;color:var(--txt-4);letter-spacing:1px}
+.footer-l b{color:var(--accent)}
+.footer-c{font-family:var(--font);font-size:12px;color:var(--txt-3);font-weight:300}
+.footer-c b{color:var(--gold);font-weight:600}
+.footer-r{font-family:var(--mono);font-size:10px;color:var(--txt-4);letter-spacing:1px}
+
+@media(max-width:1400px){.g-6{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:1100px){.g-3,.g-2l,.g-2r,.g-2{grid-template-columns:1fr}.g-6{grid-template-columns:repeat(2,1fr)}}
+
+/* SAFETY NET: AI avatar icons must always be line-only, never filled blobs */
+.ai-msg-av svg,.ai-msg-av svg path{fill:none!important;stroke-width:1.9}
+.ai-msg-av svg{width:15px!important;height:15px!important;stroke:#fff}
+</style>
+</head>
+<body>
+<!-- ══ LANDING ══ -->
+<div id="landing">
+  <div class="landing-orb"></div>
+  <div class="landing-mark">
+    <div class="landing-logo">NEXUS<span class="dot">.</span></div>
+    <div class="landing-tag">Executive Intelligence Platform</div>
+    <div class="landing-serif">Everything your leadership needs, in one view.</div>
+  </div>
+  <div class="drop-zone" id="dz">
+    <div class="drop-ring">
+      <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+    </div>
+    <div class="drop-h">Drop your data file to begin</div>
+    <div class="drop-p">Drag <b>NEXUS_DATA_TEMPLATE.xlsx</b> here, or browse below.<br>Runs fully offline — your data never leaves this device.</div>
+    <button class="btn-primary" onclick="document.getElementById('fi').click()">Browse files</button>
+    <input type="file" id="fi" accept=".xlsx,.xls" onchange="onFile(this)">
+  </div>
+  <button class="btn-ghost" onclick="loadDemo()">Explore with sample data</button>
+  <div class="drop-err" id="derr"></div>
+  <div class="landing-credit">Designed &amp; engineered by <b>sxxiif</b> · © 2025</div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app" style="display:none">
+
+<header class="topbar">
+  <div class="tb-left">
+    <div class="tb-logo">NEXUS<span class="dot">.</span></div>
+    <div class="tb-divider"></div>
+    <nav class="tb-nav">
+      <button class="active" data-view="overview" onclick="switchView('overview',this)">Overview</button>
+      <button data-view="people" onclick="switchView('people',this)">People</button>
+      <button data-view="operations" onclick="switchView('operations',this)">Operations</button>
+      <button data-view="talent" onclick="switchView('talent',this)">Talent</button>
+    </nav>
+  </div>
+  <div class="tb-center">
+    <div class="tb-clock" id="clock">--:--:--</div>
+    <div class="tb-date" id="date">—</div>
+  </div>
+  <div class="tb-right">
+    <div class="tb-status"><span class="dot"></span>LIVE DATA</div>
+    <button class="tb-btn" onclick="reloadData()"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-2.64-6.36M21 3v6h-6"/></svg>Reload</button>
+    <div class="tb-credit">by <b>sxxiif</b></div>
+  </div>
+</header>
+
+<main class="wrap" id="main"></main>
+
+<footer class="footer">
+  <div class="footer-l">NEXUS · EXECUTIVE INTELLIGENCE · <b id="ts">—</b></div>
+  <div class="footer-c">Designed &amp; engineered by <b>sxxiif</b> · © 2025</div>
+  <div class="footer-r" id="upd">—</div>
+</footer>
+
+</div>
+
+<!-- ══ DRAWER ══ -->
+<div id="scrim" onclick="closeDrawer()"></div>
+<div id="drawer">
+  <div class="dw-head">
+    <div><div class="dw-title" id="dw-title">—</div><div class="dw-sub" id="dw-sub">—</div></div>
+    <button class="dw-close" onclick="closeDrawer()"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="dw-body" id="dw-body"></div>
+</div>
+
+<!-- ══ AI ASSISTANT ══ -->
+<button id="ai-fab" onclick="toggleAI()" style="display:none">
+  <span class="ai-pulse"></span>
+  <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 015 5v1a5 5 0 01-5 5 5 5 0 01-5-5V7a5 5 0 015-5z"/><path d="M12 13v3m-4 5h8a2 2 0 002-2 5 5 0 00-5-5h-2a5 5 0 00-5 5 2 2 0 002 2z"/></svg>
+</button>
+
+<div id="ai-panel">
+  <div class="ai-head">
+    <div class="ai-head-l">
+      <div class="ai-orb"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 015 5v1a5 5 0 01-5 5 5 5 0 01-5-5V7a5 5 0 015-5z"/><path d="M12 13v3m-4 5h8a2 2 0 002-2 5 5 0 00-5-5h-2a5 5 0 00-5 5 2 2 0 002 2z"/></svg></div>
+      <div><h4>NEXUS Assistant</h4><div class="st"><span class="d"></span>Offline · reads your data</div></div>
+    </div>
+    <button class="ai-close" onclick="toggleAI()"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="ai-body" id="ai-body"></div>
+  <div class="ai-suggest" id="ai-suggest"></div>
+  <div class="ai-input-row">
+    <input class="ai-input" id="ai-input" placeholder="Ask about budget, staff, tasks, risks…" onkeydown="if(event.key==='Enter')aiSend()">
+    <button class="ai-send" onclick="aiSend()"><svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+  </div>
+</div>
+<script>
+// ╔═══════════════════════════════════════════════════════════╗
+// ║                  YOUR SETTINGS — EDIT HERE                  ║
+// ║   Change anything below. Nothing else needs to be touched.  ║
+// ╚═══════════════════════════════════════════════════════════╝
+const CONFIG={
+
+  // ── COMPANY NAME (shown top-left and on landing screen) ──
+  companyName:"NEXUS",          // e.g. "ACME CORP"
+  companyDot:".",               // small accent after the name (or "")
+  tagline:"Executive Intelligence Platform",
+  subtitle:"Everything your leadership needs, in one view.",
+
+  // ── YOUR LOGO ──
+  // OPTION A: leave logoImage empty ("") to use the text name above.
+  // OPTION B: paste your logo as a Base64 data-URL (see the guide).
+  //   Example: logoImage:"data:image/png;base64,iVBORw0KGggoAAA...",
+  logoImage:"",
+  logoHeight:34,                // logo height in pixels
+
+  // ── CREDIT (your name — keep or change) ──
+  builtBy:"sxxiif",
+
+  // ── COLOR THEME ──
+  // Pick your main accent color (used for highlights, buttons, charts).
+  accent:"#5b9dff",             // try: "#00d4ff" cyan, "#34e0a1" green, "#9d7bff" violet, "#f5c451" gold
+  accent2:"#3d7fe6",            // a slightly darker shade of your accent
+
+  // Background darkness (the base color of the whole dashboard).
+  background:"#070a12",         // try "#0a0e1a" or "#000000" for pure black
+
+  // Secondary accent (used in gradients, the AI orb, logos).
+  accentSecondary:"#9d7bff"     // violet by default
+};
+
+// ════ DEMO DATA ════
+const DEMO={
+  finance:{budgetTotal:4000000,budgetSpent:2720000,currency:"AED",period:"Q2 2025",forecastDate:"SEP 12, 2025",
+    deptBudgets:[{name:"Operations",pct:82},{name:"IT & Systems",pct:55},{name:"HR & Talent",pct:61},{name:"Projects",pct:70},{name:"Procurement",pct:45}],
+    monthlySpend:[{month:"JAN",val:310},{month:"FEB",val:380},{month:"MAR",val:420},{month:"APR",val:460},{month:"MAY",val:510},{month:"JUN",val:640}]},
+  workforce:{total:142,onSite:89,remote:31,onMission:8,sickLeave:5,annualLeave:7,other:2,newHires:3,departures:1,avgHrs:42.3,attrition:2.1,attendance:86,
+    history:[{month:"JAN",val:128},{month:"FEB",val:131},{month:"MAR",val:135},{month:"APR",val:138},{month:"MAY",val:139},{month:"JUN",val:142}]},
+  missions:[
+    {initials:"MA",name:"Mohammed Al-Mansoori",destination:"Dubai",purpose:"Client Site Visit",from:"JUN 03",to:"JUN 08",status:"ACTIVE"},
+    {initials:"SH",name:"Sara Hassan",destination:"Riyadh",purpose:"Partnership Summit",from:"JUN 05",to:"JUN 09",status:"ACTIVE"},
+    {initials:"KR",name:"Khalid Rashid",destination:"London",purpose:"Tech Conference",from:"JUN 04",to:"JUN 12",status:"TRAVEL"},
+    {initials:"LM",name:"Layla Mahmoud",destination:"Cairo",purpose:"Field Audit",from:"JUN 06",to:"JUN 10",status:"ACTIVE"},
+    {initials:"FA",name:"Fatima Alawi",destination:"Abu Dhabi",purpose:"Training",from:"JUN 05",to:"JUN 07",status:"RETURN"},
+    {initials:"AR",name:"Ahmed Rashidi",destination:"Singapore",purpose:"Trade Expo",from:"JUN 01",to:"JUN 09",status:"OVERDUE"}],
+  tasks:{completed:148,inProgress:36,blocked:16,overdue:9,total:200,
+    list:[{name:"Q2 Financial Report — Final Draft",dept:"Finance",status:"DONE",date:"JUN 04"},
+      {name:"IT Security Audit — Phase 2",dept:"IT",status:"ACTIVE",date:"DUE JUN 15"},
+      {name:"Vendor Contract Renewal — 3 contracts",dept:"Procurement",status:"BLOCKED",date:"Awaiting legal"},
+      {name:"Onboarding — 3 new joiners",dept:"HR",status:"OVERDUE",date:"Started JUN 01"},
+      {name:"Project Omega — Phase 2 Kickoff",dept:"Projects",status:"ACTIVE",date:"DUE JUN 15"},
+      {name:"Office Infrastructure Upgrade",dept:"Facilities",status:"DONE",date:"MAY 30"}]},
+  departments:[
+    {name:"Operations",staff:34,tasksPct:80,budgetPct:72,rag:"GREEN",utilization:92},
+    {name:"IT & Systems",staff:22,tasksPct:90,budgetPct:55,rag:"GREEN",utilization:78},
+    {name:"Finance",staff:18,tasksPct:95,budgetPct:68,rag:"GREEN",utilization:65},
+    {name:"Human Resources",staff:14,tasksPct:58,budgetPct:61,rag:"AMBER",utilization:70},
+    {name:"Projects",staff:28,tasksPct:74,budgetPct:70,rag:"GREEN",utilization:85},
+    {name:"Procurement",staff:16,tasksPct:65,budgetPct:58,rag:"GREEN",utilization:45}],
+  decisions:[
+    {type:"Purchase Order",title:"Server hardware upgrade — AED 180K",owner:"IT Dept",days:5,priority:"URGENT"},
+    {type:"Leave Request",title:"3 leave requests — Operations team",owner:"Operations",days:4,priority:"URGENT"},
+    {type:"Contract",title:"Vendor renewal — Facilities Mgmt",owner:"Procurement",days:2,priority:"MEDIUM"},
+    {type:"Budget Request",title:"Q3 training budget top-up — HR",owner:"HR",days:2,priority:"MEDIUM"},
+    {type:"Policy Update",title:"Remote work policy v2 sign-off",owner:"HR / Legal",days:1,priority:"INFO"}],
+  risks:[
+    {score:9,title:"Single ERP vendor dependency",owner:"IT",mitigation:"Contract review in progress",likelihood:8,impact:9,level:"HIGH"},
+    {score:6,title:"2 critical roles unfilled",owner:"HR",mitigation:"Recruitment accelerated",likelihood:5,impact:6,level:"MEDIUM"},
+    {score:5,title:"Budget overrun risk — Operations",owner:"Finance",mitigation:"Monthly review added",likelihood:6,impact:5,level:"MEDIUM"}],
+  hiring:{openRoles:11,pipeline:[{stage:"Applied",count:38},{stage:"Screening",count:14},{stage:"Interview",count:7},{stage:"Offer",count:3},{stage:"Accepted",count:2}],
+    avgDays:24,offersPending:3,conversionPct:67,
+    deptRoles:[{dept:"Operations",count:3},{dept:"IT",count:2},{dept:"Finance",count:1},{dept:"Projects",count:3},{dept:"HR",count:2}]},
+  it:[{name:"Core Network Uptime",value:"99.97%",status:"ok"},{name:"Email / Collaboration",value:"Operational",status:"ok"},
+    {name:"ERP System",value:"Operational",status:"ok"},{name:"Open IT Tickets",value:"14",status:"wn"},
+    {name:"Critical Alerts",value:"0",status:"ok"},{name:"Last Backup",value:"Today 03:00",status:"ok"},
+    {name:"Cybersecurity",value:"Secured",status:"ok"}],
+  announcements:[
+    {title:"Town Hall — Q2 Results",body:"CEO & CFO present Q2 results and H2 roadmap. Mandatory for all department heads.",date:"JUN 12 · 10:00 · Main Hall",by:"HR",type:"INFO"},
+    {title:"System Maintenance Window",body:"ERP and email offline for scheduled upgrades. Save work before the window begins.",date:"JUN 08 · 23:00–02:00",by:"IT",type:"WARNING"},
+    {title:"ISO 9001 Certification Renewed",body:"Congratulations to Operations and Quality teams. Certificate valid through June 2027.",date:"JUN 03",by:"Operations",type:"SUCCESS"}],
+  events:[
+    {day:"08",month:"JUN",title:"Payroll Processing",dept:"Finance",type:"PAYROLL"},
+    {day:"12",month:"JUN",title:"Q2 Town Hall — All Hands",dept:"All Depts",type:"MEETING"},
+    {day:"15",month:"JUN",title:"Project Omega — Phase 2 Deadline",dept:"Projects",type:"DEADLINE"},
+    {day:"16",month:"JUN",title:"New Joiners Onboarding",dept:"HR",type:"MEETING"},
+    {day:"16",month:"JUN",title:"Eid Al-Adha — Public Holiday",dept:"All",type:"HOLIDAY"},
+    {day:"22",month:"JUN",title:"Mid-Year Performance Reviews",dept:"HR",type:"REVIEW"}]
+};
+let D=null,charts={};
+
+// ════ FILE HANDLING ════
+function onFile(inp){const f=inp.files[0];if(f)readFile(f);}
+const dz=document.getElementById('dz');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');const f=e.dataTransfer.files[0];if(f)readFile(f)});
+function readFile(f){
+  if(!f.name.match(/\.xlsx?$/i)){err('Please drop an Excel (.xlsx) file');return;}
+  err('');
+  const r=new FileReader();
+  r.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'binary'});D=parseWB(wb);launch();}catch(ex){err('Could not read file — make sure it is the NEXUS template');console.error(ex);}};
+  r.readAsBinaryString(f);
+}
+function err(m){document.getElementById('derr').textContent=m;}
+function loadDemo(){D=JSON.parse(JSON.stringify(DEMO));launch();}
+function reloadData(){D=null;Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};document.getElementById('app').style.display='none';document.getElementById('ai-fab').style.display='none';document.getElementById('landing').classList.remove('hidden');}
+
+function parseWB(wb){
+  const d=JSON.parse(JSON.stringify(DEMO));
+  const rows=n=>{const ws=wb.Sheets[n];return ws?XLSX.utils.sheet_to_json(ws,{header:1,defval:''}):[];};
+  const num=v=>{const n=Number(String(v).replace(/[^0-9.-]/g,''));return isNaN(n)?0:n;};
+  try{const f=rows('💰 Finance');if(f.length>7){
+    d.finance.budgetTotal=num(f[3][1])||d.finance.budgetTotal;
+    d.finance.budgetSpent=num(f[4][1])||d.finance.budgetSpent;
+    d.finance.period=f[5][1]||d.finance.period;d.finance.currency=f[6][1]||d.finance.currency;
+    d.finance.forecastDate=f[7][1]||d.finance.forecastDate;
+    const db=[];for(let i=11;i<=18;i++)if(f[i]&&f[i][0])db.push({name:String(f[i][0]),pct:num(f[i][1])});
+    if(db.length)d.finance.deptBudgets=db;
+    const ms=[];for(let i=23;i<=28;i++)if(f[i]&&f[i][0])ms.push({month:String(f[i][2]||f[i][0]).substring(0,3).toUpperCase(),val:num(f[i][1])});
+    if(ms.length)d.finance.monthlySpend=ms;}}catch(e){}
+  try{const w=rows('👥 Workforce');if(w.length>7){
+    const m={3:'total',4:'onSite',5:'remote',6:'onMission',7:'sickLeave',8:'annualLeave',9:'other'};
+    for(const[r,k]of Object.entries(m))if(w[r]&&w[r][1]!=='')d.workforce[k]=num(w[r][1]);
+    const mm={13:'newHires',14:'departures',15:'avgHrs',16:'attrition',17:'attendance'};
+    for(const[r,k]of Object.entries(mm))if(w[r]&&w[r][1]!=='')d.workforce[k]=num(w[r][1]);
+    const h=[];for(let i=22;i<=27;i++)if(w[i]&&w[i][0])h.push({month:String(w[i][0]).substring(0,3).toUpperCase(),val:num(w[i][1])});
+    if(h.length)d.workforce.history=h;}}catch(e){}
+  try{const m=rows('✈️ Missions');if(m.length>5){const a=[];
+    for(let i=4;i<m.length;i++){if(!m[i][0])continue;a.push({name:String(m[i][0]),initials:String(m[i][1]||'').substring(0,2).toUpperCase()||'··',destination:String(m[i][2]),purpose:String(m[i][3]),from:String(m[i][4]),to:String(m[i][5]),status:String(m[i][6]).toUpperCase()});}
+    if(a.length)d.missions=a;}}catch(e){}
+  try{const t=rows('✅ Tasks');if(t.length>5){
+    d.tasks.completed=num(t[3][1]);d.tasks.inProgress=num(t[4][1]);d.tasks.blocked=num(t[5][1]);d.tasks.overdue=num(t[6][1]);d.tasks.total=num(t[7][1]);
+    const l=[];for(let i=13;i<t.length;i++){if(!t[i][0])continue;l.push({name:String(t[i][0]),dept:String(t[i][1]),status:String(t[i][2]).toUpperCase(),date:String(t[i][3])});}
+    if(l.length)d.tasks.list=l;}}catch(e){}
+  try{const dp=rows('🏢 Departments');if(dp.length>5){const a=[];
+    for(let i=4;i<dp.length;i++){if(!dp[i][0])continue;a.push({name:String(dp[i][0]),staff:num(dp[i][1]),tasksPct:num(dp[i][2]),budgetPct:num(dp[i][3]),utilization:num(dp[i][4]),rag:String(dp[i][5]).toUpperCase()});}
+    if(a.length)d.departments=a;}}catch(e){}
+  try{const dc=rows('⚡ Decisions');if(dc.length>5){const a=[];
+    for(let i=4;i<dc.length;i++){if(!dc[i][0])continue;a.push({type:String(dc[i][0]),title:String(dc[i][1]),owner:String(dc[i][2]),days:num(dc[i][3]),priority:String(dc[i][4]).toUpperCase()});}
+    if(a.length)d.decisions=a;}}catch(e){}
+  try{const rk=rows('⚠️ Risks');if(rk.length>5){const a=[];
+    for(let i=4;i<rk.length;i++){if(!rk[i][0])continue;const lk=num(rk[i][3]),im=num(rk[i][4]);a.push({title:String(rk[i][0]),owner:String(rk[i][1]),mitigation:String(rk[i][2]),likelihood:lk,impact:im,level:String(rk[i][5]).toUpperCase(),score:Math.round(lk*im/10)});}
+    if(a.length)d.risks=a;}}catch(e){}
+  try{const h=rows('🎯 Hiring');if(h.length>5){const p=[];
+    for(let i=4;i<=8;i++)if(h[i]&&h[i][0])p.push({stage:String(h[i][0]),count:num(h[i][1])});
+    if(p.length)d.hiring.pipeline=p;
+    if(h[12])d.hiring.openRoles=num(h[12][1]);if(h[13])d.hiring.avgDays=num(h[13][1]);
+    if(h[14])d.hiring.offersPending=num(h[14][1]);if(h[15])d.hiring.conversionPct=num(h[15][1]);
+    const dr=[];for(let i=20;i<h.length;i++)if(h[i]&&h[i][0])dr.push({dept:String(h[i][0]),count:num(h[i][1])});
+    if(dr.length)d.hiring.deptRoles=dr;}}catch(e){}
+  try{const it=rows('🖥️ IT Health');if(it.length>5){const a=[];
+    for(let i=4;i<it.length;i++){if(!it[i][0])continue;const v=String(it[i][1]);const s=(v==='Operational'||v==='Secured'||v==='0'||parseFloat(v)>99)?'ok':(v==='Degraded')?'wn':(v==='Down')?'cr':'ok';a.push({name:String(it[i][0]),value:v,status:s});}
+    if(a.length)d.it=a;}}catch(e){}
+  try{const an=rows('📢 Announcements');if(an.length>7){const aa=[];
+    for(let i=6;i<=10;i++)if(an[i]&&an[i][0])aa.push({title:String(an[i][0]),body:String(an[i][1]),date:String(an[i][2]),by:String(an[i][3]),type:String(an[i][4]).toUpperCase()});
+    if(aa.length)d.announcements=aa;
+    const ev=[];for(let i=15;i<an.length;i++)if(an[i]&&an[i][0])ev.push({title:String(an[i][0]),dept:String(an[i][1]),day:String(an[i][2]),month:String(an[i][3]),type:String(an[i][4]).toUpperCase()});
+    if(ev.length)d.events=ev;}}catch(e){}
+  return d;
+}
+// ════ HELPERS ════
+function fmt(n){return Number(n).toLocaleString('en-US');}
+function pct(a,b){return b?Math.round(a/b*100):0;}
+function applyConfig(){
+  const r=document.documentElement.style;
+  r.setProperty('--accent',CONFIG.accent);
+  r.setProperty('--accent-2',CONFIG.accent2);
+  r.setProperty('--bg',CONFIG.background);
+  r.setProperty('--violet',CONFIG.accentSecondary);
+  // hex to rgba for the glow
+  const hx=CONFIG.accent.replace('#','');
+  const rr=parseInt(hx.substring(0,2),16),gg=parseInt(hx.substring(2,4),16),bb=parseInt(hx.substring(4,6),16);
+  r.setProperty('--accent-glow',`rgba(${rr},${gg},${bb},0.15)`);
+  // logo / names
+  const logoHTML=CONFIG.logoImage
+    ? `<img src="${CONFIG.logoImage}" style="height:${CONFIG.logoHeight}px;width:auto;display:block" alt="${CONFIG.companyName}">`
+    : `${CONFIG.companyName}<span class="dot">${CONFIG.companyDot}</span>`;
+  document.querySelectorAll('.tb-logo').forEach(e=>e.innerHTML=logoHTML);
+  // landing
+  const ll=document.querySelector('.landing-logo');
+  if(ll) ll.innerHTML = CONFIG.logoImage
+    ? `<img src="${CONFIG.logoImage}" style="height:${CONFIG.logoHeight*1.8}px;width:auto" alt="${CONFIG.companyName}">`
+    : `${CONFIG.companyName}<span class="dot">${CONFIG.companyDot}</span>`;
+  const lt=document.querySelector('.landing-tag');if(lt)lt.textContent=CONFIG.tagline;
+  const ls=document.querySelector('.landing-serif');if(ls)ls.textContent=CONFIG.subtitle;
+  // credits
+  document.querySelectorAll('.tb-credit b').forEach(e=>e.textContent=CONFIG.builtBy.split(' ').map((w,i)=>i===0?w[0]+'.':w).join(' ').toUpperCase());
+  document.querySelectorAll('.footer-c b, .landing-credit b').forEach(e=>e.textContent=CONFIG.builtBy);
+  document.title=CONFIG.companyName+' — '+CONFIG.tagline;
+}
+
+function launch(){
+  applyConfig();
+  document.getElementById('landing').classList.add('hidden');
+  document.getElementById('app').style.display='block';
+  document.getElementById('ai-fab').style.display='flex';
+  document.getElementById('ts').textContent='DATA LOADED '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  render();startClock();initAI();
+}
+function startClock(){function t(){const n=new Date();const h=String(n.getHours()).padStart(2,'0'),m=String(n.getMinutes()).padStart(2,'0'),s=String(n.getSeconds()).padStart(2,'0');document.getElementById('clock').textContent=`${h}:${m}:${s}`;document.getElementById('date').textContent=n.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}).toUpperCase();document.getElementById('upd').textContent='UPDATED '+h+':'+m;}t();setInterval(t,1000);}
+let currentView='overview';
+function switchView(view,btn){
+  currentView=view;
+  document.querySelectorAll('.tb-nav button').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  else document.querySelector(`.tb-nav button[data-view="${view}"]`)?.classList.add('active');
+  // destroy charts before re-render to avoid canvas reuse errors
+  Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};
+  render();
+  document.getElementById('main').scrollIntoView({behavior:'instant',block:'start'});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+const ICON={
+  wallet:'<path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 000 4h4v-4h-4z"/>',
+  users:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>',
+  pin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>',
+  check:'<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/>',
+  gavel:'<path d="M14 13l-7.5 7.5a2.12 2.12 0 01-3-3L11 10M16 16l6-6M8 8l6-6M9 7l8 8M21 11l-8-8"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',
+  alert:'<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/>',
+  activity:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  cpu:'<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/>',
+  target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  mega:'<path d="M3 11l18-5v12L3 14v-3zM11.6 16.8a3 3 0 11-5.8-1.6"/>',
+  cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  trend:'<path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/>'
+};
+function icon(name,color){return `<span class="ic" style="background:${color}1a;color:${color}"><svg viewBox="0 0 24 24" stroke="${color}">${ICON[name]}</svg></span>`;}
+function statusColor(s){return{DONE:'var(--emerald)',ACTIVE:'var(--accent)',BLOCKED:'var(--red)',OVERDUE:'var(--amber)',RETURN:'var(--emerald)',TRAVEL:'var(--cyan)'}[s]||'var(--txt-3)';}
+function statusChip(s){const c={DONE:'c-emerald',ACTIVE:'c-accent',BLOCKED:'c-red',OVERDUE:'c-amber',RETURN:'c-emerald',TRAVEL:'c-teal'}[s]||'c-mute';return `<span class="chip ${c}">${s}</span>`;}
+function ragColor(r){return r==='GREEN'?'var(--emerald)':r==='AMBER'?'var(--amber)':'var(--red)';}
+
+// ════ RENDER ════
+function render(){
+  const m=document.getElementById('main');
+  if(currentView==='overview') renderOverview(m);
+  else if(currentView==='people') renderPeople(m);
+  else if(currentView==='operations') renderOperations(m);
+  else if(currentView==='talent') renderTalent(m);
+}
+
+// ════ VIEW: OVERVIEW ════
+function renderOverview(m){
+  const spent=pct(D.finance.budgetSpent,D.finance.budgetTotal);
+  const green=D.departments.filter(x=>x.rag==='GREEN').length;
+  const amber=D.departments.filter(x=>x.rag==='AMBER').length;
+  const red=D.departments.filter(x=>x.rag==='RED').length;
+  const overdueM=D.missions.filter(x=>x.status==='OVERDUE').length;
+  const urg=D.decisions.filter(x=>x.priority==='URGENT').length;
+
+  m.innerHTML=`
+  ${viewHeader('Command Overview','Executive snapshot across all functions',D.finance.period+' · LIVE')}
+  <div class="grid g-6">
+    ${kpi('wallet','var(--gold)',spent+'%',`${D.finance.currency} ${fmt(D.finance.budgetSpent)} of ${fmt(D.finance.budgetTotal)}`,'nt','▸ '+(100-spent)+'% remaining','finance')}
+    ${kpi('users','var(--accent)',D.workforce.total,'Active employees','up','+'+D.workforce.newHires+' this month','workforce')}
+    ${kpi('pin','var(--emerald)',D.workforce.onSite,pct(D.workforce.onSite,D.workforce.total)+'% of workforce','nt',D.workforce.remote+' remote · '+D.workforce.onMission+' on mission','presence')}
+    ${kpi('check','var(--cyan)',pct(D.tasks.completed,D.tasks.total)+'%',D.tasks.completed+' of '+D.tasks.total+' tasks','up',D.tasks.blocked+' blocked · '+D.tasks.overdue+' overdue','tasks')}
+    ${kpi('gavel','var(--red)',D.decisions.length,'Awaiting approval','dn',urg+' urgent · action needed','decisions')}
+    ${kpi('grid','var(--violet)',green+'/'+D.departments.length,'Departments healthy','up',amber+' need attention'+(red?' · '+red+' critical':''),'departments')}
+  </div>
+
+  <div class="grid g-3">
+    ${financePanel(spent)}
+    ${workforcePanel()}
+    ${missionPanel(overdueM)}
+  </div>
+
+  <div class="grid g-3">
+    ${decisionsPanel(urg)}
+    ${riskPanel()}
+    ${utilPanel()}
+  </div>
+
+  <div class="grid g-2l">
+    ${tasksPanel()}
+    <div class="stack">${ragPanel(green,amber,red)}${systemPanel()}</div>
+  </div>
+
+  <div class="grid g-3">
+    ${hiringPanel()}
+    ${annPanel()}
+    ${eventsPanel()}
+  </div>
+  ${viewNav('overview')}`;
+
+  requestAnimationFrame(()=>{drawBudget();drawSpend();drawHC();drawTasks();drawRisk();drawSparks();});
+}
+
+// ════ VIEW HELPERS ════
+function viewHeader(title,sub,meta){
+  return `<div class="view-hero">
+    <div><h1 class="view-title">${title}</h1><div class="view-sub">${sub}</div></div>
+    ${meta?`<div class="view-meta">${meta}</div>`:''}
+  </div>`;
+}
+function viewNav(active){
+  const tabs=[['overview','Overview'],['people','People'],['operations','Operations'],['talent','Talent']];
+  const i=tabs.findIndex(t=>t[0]===active);
+  const prev=i>0?tabs[i-1]:null,next=i<tabs.length-1?tabs[i+1]:null;
+  return `<div class="view-foot-nav">
+    ${prev?`<button class="vnav-btn" onclick="switchView('${prev[0]}')"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg><div><div class="vnav-dir">Previous</div><div class="vnav-name">${prev[1]}</div></div></button>`:'<div></div>'}
+    ${next?`<button class="vnav-btn next" onclick="switchView('${next[0]}')"><div><div class="vnav-dir">Next</div><div class="vnav-name">${next[1]}</div></div><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>`:'<div></div>'}
+  </div>`;
+}
+function statTile(label,value,sub,color){
+  return `<div class="stat-tile"><div class="stat-tile-bar" style="background:${color}"></div><div class="stat-tile-l">${label}</div><div class="stat-tile-v" style="color:${color}">${value}</div>${sub?`<div class="stat-tile-s">${sub}</div>`:''}</div>`;
+}
+
+// ════ VIEW: PEOPLE ════
+function renderPeople(m){
+  const W=D.workforce;
+  const away=W.sickLeave+W.annualLeave+W.other;
+  const overdueM=D.missions.filter(x=>x.status==='OVERDUE').length;
+  const presenceCells=[['On-Site',W.onSite,'var(--emerald)','Working from office'],['Remote / WFH',W.remote,'var(--accent)','Working off-site'],['On Mission',W.onMission,'var(--amber)','Travel / field'],['Sick Leave',W.sickLeave,'var(--red)','Medical absence'],['Annual Leave',W.annualLeave,'var(--violet)','Approved holiday'],['Other',W.other,'var(--txt-3)','Unpaid / other']];
+
+  m.innerHTML=`
+  ${viewHeader('People','Workforce intelligence, presence &amp; field deployments','HUMAN CAPITAL')}
+
+  <div class="grid g-6">
+    ${statTile('Total Headcount',W.total,'active employees','var(--accent)')}
+    ${statTile('Present Today',W.onSite+W.remote,pct(W.onSite+W.remote,W.total)+'% working','var(--emerald)')}
+    ${statTile('On Mission',W.onMission,'in the field','var(--amber)')}
+    ${statTile('On Leave',away,'away today','var(--violet)')}
+    ${statTile('Attendance',W.attendance+'%','this period','var(--cyan)')}
+    ${statTile('Attrition',W.attrition+'%','rolling rate',W.attrition>5?'var(--red)':'var(--emerald)')}
+  </div>
+
+  <div class="grid g-2l">
+    <div class="panel">
+      <div class="p-head"><div class="p-title">${icon('users','var(--accent)')}<div><h3>Live Presence Breakdown</h3><div class="sub">Where everyone is right now</div></div></div><span class="chip c-emerald">LIVE</span></div>
+      <div class="presence" style="grid-template-columns:repeat(3,1fr)">
+        ${presenceCells.map(([l,v,c,d])=>`<div class="pcell" style="padding:16px"><div class="pcell-bar" style="background:${c}"></div><div class="pcell-v" style="color:${c};font-size:26px">${v}</div><div class="pcell-l">${l}</div><div style="font-family:var(--mono);font-size:9px;color:var(--txt-4);margin-top:4px">${d}</div></div>`).join('')}
+      </div>
+      <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--line)">
+        <div class="bar"><div class="bar-top"><span class="bar-lbl">Overall attendance</span><span class="bar-val" style="color:var(--emerald)">${W.attendance}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${W.attendance}%;background:linear-gradient(90deg,#1a9e75,var(--emerald))"></div></div></div>
+        <div class="bar"><div class="bar-top"><span class="bar-lbl">On-site ratio</span><span class="bar-val">${pct(W.onSite,W.total)}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct(W.onSite,W.total)}%;background:linear-gradient(90deg,var(--accent-2),var(--accent))"></div></div></div>
+        <div class="bar"><div class="bar-top"><span class="bar-lbl">Remote ratio</span><span class="bar-val">${pct(W.remote,W.total)}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct(W.remote,W.total)}%;background:linear-gradient(90deg,var(--violet),#b89bff)"></div></div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="p-head"><div class="p-title">${icon('trend','var(--emerald)')}<div><h3>Headcount Trend</h3><div class="sub">6-month growth</div></div></div></div>
+      <div style="position:relative;height:160px;margin-bottom:16px"><canvas id="cHC"></canvas></div>
+      <div class="mini-row">
+        <div class="mini" style="border-top-color:var(--emerald)"><div class="mini-v" style="color:var(--emerald)">+${W.newHires}</div><div class="mini-l">New Hires</div></div>
+        <div class="mini" style="border-top-color:var(--red)"><div class="mini-v" style="color:var(--red)">${W.departures}</div><div class="mini-l">Departures</div></div>
+        <div class="mini" style="border-top-color:var(--accent)"><div class="mini-v" style="color:var(--accent)">${W.newHires-W.departures>=0?'+':''}${W.newHires-W.departures}</div><div class="mini-l">Net</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g-2r">
+    <div class="panel">
+      <div class="p-head"><div class="p-title">${icon('activity','var(--amber)')}<div><h3>Working Hours</h3><div class="sub">Average per week</div></div></div></div>
+      <div style="text-align:center;padding:24px 0">
+        <div style="font-family:var(--font);font-size:48px;font-weight:800;letter-spacing:-2px;color:var(--amber)">${W.avgHrs}</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--txt-3);letter-spacing:1px;text-transform:uppercase;margin-top:4px">hours / week / employee</div>
+      </div>
+      <div class="bar"><div class="bar-top"><span class="bar-lbl">vs. 40h standard</span><span class="bar-val" style="color:${W.avgHrs>45?'var(--red)':'var(--emerald)'}">${W.avgHrs>40?'+':''}${(W.avgHrs-40).toFixed(1)}h</span></div><div class="bar-track"><div class="bar-fill" style="width:${Math.min(W.avgHrs/50*100,100)}%;background:${W.avgHrs>45?'var(--red)':'linear-gradient(90deg,#c98a1a,var(--amber))'}"></div></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="p-head"><div class="p-title">${icon('pin','var(--amber)')}<div><h3>Active Missions &amp; Travel</h3><div class="sub">Full deployment register</div></div></div><span class="chip c-amber">${D.missions.length} active</span></div>
+      ${D.missions.map((mi,i)=>`<div class="lrow" onclick="openDrawer('mission',${i})"><div class="avatar" style="background:${statusColor(mi.status)}1a;color:${statusColor(mi.status)}">${mi.initials}</div><div class="lrow-main"><div class="lrow-t">${mi.name}</div><div class="lrow-s">${mi.destination} · ${mi.purpose} · ${mi.from}→${mi.to}</div></div><div class="lrow-tag">${statusChip(mi.status)}</div></div>`).join('')}
+      ${overdueM?`<div class="dw-note r" style="margin-top:14px">⚠ ${overdueM} mission${overdueM>1?'s':''} exceeded the 7-day limit — manager review required.</div>`:''}
+    </div>
+  </div>
+  ${viewNav('people')}`;
+
+  requestAnimationFrame(()=>{drawHC();});
+}
+
+// ════ VIEW: OPERATIONS ════
+function renderOperations(m){
+  const t=D.tasks;
+  const green=D.departments.filter(x=>x.rag==='GREEN').length;
+  const amber=D.departments.filter(x=>x.rag==='AMBER').length;
+  const red=D.departments.filter(x=>x.rag==='RED').length;
+  const urg=D.decisions.filter(x=>x.priority==='URGENT').length;
+  const overloaded=D.departments.filter(d=>d.utilization>=90).length;
+
+  m.innerHTML=`
+  ${viewHeader('Operations','Execution, risk, decisions &amp; capacity','OPERATIONAL COMMAND')}
+
+  <div class="grid g-6">
+    ${statTile('Tasks Done',pct(t.completed,t.total)+'%',t.completed+' of '+t.total,'var(--cyan)')}
+    ${statTile('Blocked',t.blocked,'need escalation',t.blocked>0?'var(--red)':'var(--emerald)')}
+    ${statTile('Overdue',t.overdue,'past deadline',t.overdue>0?'var(--amber)':'var(--emerald)')}
+    ${statTile('Decisions',D.decisions.length,urg+' urgent','var(--red)')}
+    ${statTile('Active Risks',D.risks.length,D.risks.filter(r=>r.level==='HIGH').length+' high','var(--amber)')}
+    ${statTile('Overloaded',overloaded,'teams at capacity',overloaded>0?'var(--red)':'var(--emerald)')}
+  </div>
+
+  <div class="grid g-2l">
+    ${tasksPanel()}
+    <div class="stack">${decisionsPanel(urg)}</div>
+  </div>
+
+  <div class="grid g-3">
+    ${riskPanel()}
+    ${utilPanel()}
+    ${systemPanel()}
+  </div>
+
+  <div class="grid g-1">
+    ${ragPanel(green,amber,red)}
+  </div>
+  ${viewNav('operations')}`;
+
+  requestAnimationFrame(()=>{drawTasks();drawRisk();});
+}
+
+// ════ VIEW: TALENT ════
+function renderTalent(m){
+  const h=D.hiring;
+  const inPipe=h.pipeline.reduce((s,p)=>s+p.count,0);
+  m.innerHTML=`
+  ${viewHeader('Talent','Recruitment pipeline &amp; company communications','TALENT &amp; CULTURE')}
+
+  <div class="grid g-6">
+    ${statTile('Open Roles',h.openRoles,'actively hiring','var(--violet)')}
+    ${statTile('In Pipeline',inPipe,'candidates','var(--accent)')}
+    ${statTile('Offers Out',h.offersPending,'pending response','var(--amber)')}
+    ${statTile('Time to Hire',h.avgDays+'d','average','var(--cyan)')}
+    ${statTile('Conversion',h.conversionPct+'%','offer→accept','var(--emerald)')}
+    ${statTile('Events',D.events.length,'upcoming','var(--teal)')}
+  </div>
+
+  <div class="grid g-2l">
+    <div class="panel">
+      <div class="p-head"><div class="p-title">${icon('target','var(--violet)')}<div><h3>Recruitment Funnel</h3><div class="sub">Candidate flow by stage</div></div></div><span class="chip c-violet">${h.openRoles} open roles</span></div>
+      <div class="pipe" style="margin-bottom:24px">${h.pipeline.map((p,i,a)=>{const c=i===a.length-1?'var(--emerald)':i===a.length-2?'var(--amber)':'var(--accent)';return `<div class="pipe-s" style="padding:18px 6px"><div class="pipe-v" style="color:${c};font-size:26px">${p.count}</div><div class="pipe-l">${p.stage}</div></div>`;}).join('')}</div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--txt-3);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Open Roles by Department</div>
+      ${(h.deptRoles||[]).map(r=>`<div class="bar"><div class="bar-top"><span class="bar-lbl">${r.dept}</span><span class="bar-val">${r.count} role${r.count!==1?'s':''}</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct(r.count,h.openRoles)}%;background:linear-gradient(90deg,var(--violet),#b89bff)"></div></div></div>`).join('')}
+      <div class="mini-row" style="margin-top:18px">
+        <div class="mini" style="border-top-color:var(--accent)"><div class="mini-v" style="color:var(--accent)">${h.avgDays}</div><div class="mini-l">Days to Hire</div></div>
+        <div class="mini" style="border-top-color:var(--amber)"><div class="mini-v" style="color:var(--amber)">${h.offersPending}</div><div class="mini-l">Offers Out</div></div>
+        <div class="mini" style="border-top-color:var(--emerald)"><div class="mini-v" style="color:var(--emerald)">${h.conversionPct}%</div><div class="mini-l">Conversion</div></div>
+      </div>
+    </div>
+    <div class="stack">${annPanel()}</div>
+  </div>
+
+  <div class="grid g-1">
+    ${eventsPanel()}
+  </div>
+  ${viewNav('talent')}`;
+}
+
+function kpi(ic,color,val,sub,delta,deltaTxt,panel){
+  const dc=delta==='up'?'up':delta==='dn'?'dn':'nt';
+  const arrow=delta==='up'?'↑':delta==='dn'?'↓':'';
+  return `<div class="kpi" onclick="openDrawer('${panel}')">
+    <div class="kpi-glow" style="background:${color}"></div>
+    <div class="kpi-top">${icon2(ic,color)}<canvas class="kpi-spark" data-color="${color}" width="54" height="24"></canvas></div>
+    <div class="kpi-lbl">${sub.split('·')[0]}</div>
+    <div class="kpi-val" style="color:${color}">${val}</div>
+    <div class="kpi-foot"><span class="kpi-delta ${dc}">${arrow} ${deltaTxt}</span></div>
+  </div>`;
+}
+function icon2(name,color){return `<span class="kpi-ic" style="background:${color}1a;color:${color}"><svg viewBox="0 0 24 24" stroke="${color}">${ICON[name]}</svg></span>`;}
+
+function financePanel(spent){
+  return `<div class="panel tap" onclick="openDrawer('finance')">
+    <div class="p-head"><div class="p-title">${icon('wallet','var(--gold)')}<div><h3>Budget Intelligence</h3><div class="sub">${D.finance.period}</div></div></div><span class="chip c-gold">${spent}% used</span></div>
+    <div class="donut-wrap">
+      <div class="donut-canvas" style="width:108px;height:108px"><canvas id="cBudget" width="108" height="108"></canvas>
+        <div class="donut-center"><div class="big" style="color:var(--gold)">${spent}%</div><div class="sm">Utilized</div></div></div>
+      <div style="flex:1">
+        <div style="margin-bottom:10px"><div style="font-family:var(--mono);font-size:9px;color:var(--txt-3);letter-spacing:1px;text-transform:uppercase">Total Budget</div><div style="font-family:var(--font);font-size:18px;font-weight:700;color:var(--gold);letter-spacing:-0.5px">${D.finance.currency} ${fmt(D.finance.budgetTotal)}</div></div>
+        <div style="display:flex;gap:16px;margin-bottom:11px">
+          <div><div style="font-family:var(--mono);font-size:9px;color:var(--txt-3);text-transform:uppercase">Spent</div><div style="font-family:var(--font);font-size:14px;font-weight:600;color:var(--rose)">${fmt(D.finance.budgetSpent)}</div></div>
+          <div><div style="font-family:var(--mono);font-size:9px;color:var(--txt-3);text-transform:uppercase">Left</div><div style="font-family:var(--font);font-size:14px;font-weight:600;color:var(--emerald)">${fmt(D.finance.budgetTotal-D.finance.budgetSpent)}</div></div>
+        </div>
+        <div style="padding:8px 11px;background:rgba(245,196,81,0.06);border:1px solid rgba(245,196,81,0.18);border-radius:var(--r-sm)"><div style="font-family:var(--mono);font-size:9px;color:var(--amber);letter-spacing:0.3px">⚡ FORECAST EXHAUST · <b style="color:var(--gold)">${D.finance.forecastDate}</b></div></div>
+      </div>
+    </div>
+    ${D.finance.deptBudgets.map(d=>`<div class="bar"><div class="bar-top"><span class="bar-lbl">${d.name}</span><span class="bar-val">${d.pct}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${d.pct}%;background:linear-gradient(90deg,var(--accent-2),var(--accent))"></div></div></div>`).join('')}
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)"><div style="font-family:var(--mono);font-size:9px;color:var(--txt-3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Monthly Spend · ${D.finance.currency} '000</div><div style="position:relative;height:60px"><canvas id="cSpend"></canvas></div></div>
+  </div>`;
+}
+
+function workforcePanel(){
+  const cells=[['On-Site',D.workforce.onSite,'var(--emerald)'],['Remote',D.workforce.remote,'var(--accent)'],['Mission',D.workforce.onMission,'var(--amber)'],['Sick',D.workforce.sickLeave,'var(--red)'],['Annual',D.workforce.annualLeave,'var(--violet)'],['Other',D.workforce.other,'var(--txt-3)']];
+  return `<div class="panel tap" onclick="openDrawer('workforce')">
+    <div class="p-head"><div class="p-title">${icon('users','var(--accent)')}<div><h3>Workforce Status</h3><div class="sub">Live presence</div></div></div><span class="chip c-emerald">LIVE</span></div>
+    <div class="presence">${cells.map(([l,v,c])=>`<div class="pcell"><div class="pcell-bar" style="background:${c}"></div><div class="pcell-v" style="color:${c}">${v}</div><div class="pcell-l">${l}</div></div>`).join('')}</div>
+    <div class="bar"><div class="bar-top"><span class="bar-lbl">Attendance rate</span><span class="bar-val" style="color:var(--emerald)">${D.workforce.attendance}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${D.workforce.attendance}%;background:linear-gradient(90deg,#1a9e75,var(--emerald))"></div></div></div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)"><div style="font-family:var(--mono);font-size:9px;color:var(--txt-3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Headcount Growth</div><div style="position:relative;height:60px"><canvas id="cHC"></canvas></div></div>
+    <div class="mini-row">
+      <div class="mini" style="border-top-color:var(--emerald)"><div class="mini-v" style="color:var(--emerald)">+${D.workforce.newHires}</div><div class="mini-l">Hires</div></div>
+      <div class="mini" style="border-top-color:var(--red)"><div class="mini-v" style="color:var(--red)">${D.workforce.departures}</div><div class="mini-l">Exits</div></div>
+      <div class="mini" style="border-top-color:var(--amber)"><div class="mini-v" style="color:var(--amber)">${D.workforce.avgHrs}</div><div class="mini-l">Avg Hrs</div></div>
+      <div class="mini" style="border-top-color:var(--accent)"><div class="mini-v" style="color:var(--accent)">${D.workforce.attrition}%</div><div class="mini-l">Attrition</div></div>
+    </div>
+  </div>`;
+}
+
+function missionPanel(overdue){
+  return `<div class="panel">
+    <div class="p-head"><div class="p-title">${icon('pin','var(--amber)')}<div><h3>Mission Tracker</h3><div class="sub">Field deployments</div></div></div><span class="chip c-amber">${D.missions.length} active</span></div>
+    ${D.missions.slice(0,6).map((m,i)=>`<div class="lrow" onclick="openDrawer('mission',${i})"><div class="avatar" style="background:${statusColor(m.status)}1a;color:${statusColor(m.status)}">${m.initials}</div><div class="lrow-main"><div class="lrow-t">${m.name}</div><div class="lrow-s">${m.destination} · ${m.purpose}</div></div><div class="lrow-tag">${statusChip(m.status)}</div></div>`).join('')}
+    ${overdue?`<div class="dw-note r" style="margin-top:14px">⚠ ${overdue} mission${overdue>1?'s':''} exceeded the 7-day limit — manager review required.</div>`:''}
+  </div>`;
+}
+function decisionsPanel(urg){
+  const avg=Math.round(D.decisions.reduce((s,d)=>s+d.days,0)/D.decisions.length*10)/10;
+  return `<div class="panel">
+    <div class="p-head"><div class="p-title">${icon('gavel','var(--red)')}<div><h3>Decisions Pending</h3><div class="sub">Awaiting your approval</div></div></div><span class="chip c-red">${D.decisions.length} items</span></div>
+    ${D.decisions.map((d,i)=>{const c=d.priority==='URGENT'?'var(--red)':d.priority==='MEDIUM'?'var(--amber)':'var(--accent)';const ageC=d.days>=4?'var(--red)':d.days>=2?'var(--amber)':'var(--emerald)';return `<div class="dec" onclick="openDrawer('decision',${i})"><div class="dec-bar" style="background:${c}"></div><div class="dec-ic" style="background:${c}1a;color:${c}"><svg viewBox="0 0 24 24" stroke="${c}">${ICON.gavel}</svg></div><div class="dec-main"><div class="dec-type" style="color:${c}">${d.priority} · ${d.type}</div><div class="dec-t">${d.title}</div></div><div class="dec-meta"><div class="dec-owner">${d.owner}</div><div class="dec-age" style="color:${ageC}">${d.days}d</div></div></div>`;}).join('')}
+    <div class="dec-foot"><span class="leg"><span class="d" style="background:var(--red)"></span>${D.decisions.filter(x=>x.priority==='URGENT').length} urgent</span><span class="leg"><span class="d" style="background:var(--amber)"></span>${D.decisions.filter(x=>x.priority==='MEDIUM').length} medium</span><span class="leg"><span class="d" style="background:var(--accent)"></span>${D.decisions.filter(x=>x.priority==='INFO').length} info</span><span style="margin-left:auto;color:var(--txt-3)">avg ${avg} days</span></div>
+  </div>`;
+}
+
+function riskPanel(){
+  return `<div class="panel">
+    <div class="p-head"><div class="p-title">${icon('alert','var(--amber)')}<div><h3>Risk Register</h3><div class="sub">Active exposure</div></div></div><span class="chip c-amber">${D.risks.length} active</span></div>
+    ${D.risks.map((r,i)=>{const c=r.level==='HIGH'?'var(--red)':r.level==='MEDIUM'?'var(--amber)':'var(--emerald)';return `<div class="risk" onclick="openDrawer('risk',${i})"><div class="risk-score" style="background:${c}1a;color:${c}">${r.score}</div><div class="risk-main"><div class="risk-t">${r.title}</div><div class="risk-s">${r.owner} · ${r.mitigation}</div></div><div class="risk-lvl"><div class="lv" style="color:${c}">${r.level}</div><div class="tk"><div style="width:${r.score*10}%;background:${c}"></div></div></div></div>`;}).join('')}
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)"><div style="font-family:var(--mono);font-size:9px;color:var(--txt-3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Risk Matrix · Likelihood × Impact</div><div style="position:relative;height:74px"><canvas id="cRisk"></canvas></div></div>
+  </div>`;
+}
+
+function utilPanel(){
+  const over=D.departments.filter(d=>d.utilization>=90);
+  return `<div class="panel">
+    <div class="p-head"><div class="p-title">${icon('activity','var(--teal)')}<div><h3>Resource Capacity</h3><div class="sub">Team utilization</div></div></div><span class="chip c-teal">By dept</span></div>
+    <div class="util">${D.departments.map(d=>{const c=d.utilization>=90?'var(--red)':d.utilization>=75?'var(--amber)':d.utilization>=50?'var(--emerald)':'var(--accent)';const l=d.utilization>=90?'Overload':d.utilization>=75?'High':d.utilization>=50?'Optimal':'Low';return `<div class="ucol"><div class="ucol-n">${d.name.substring(0,8)}</div><div class="ucol-bar"><div class="ucol-fill" style="height:${d.utilization}%;background:linear-gradient(180deg,${c},${c}66)"></div></div><div class="ucol-v" style="color:${c}">${d.utilization}%</div><div class="ucol-st" style="color:${c}">${l}</div></div>`;}).join('')}</div>
+    ${over.length?`<div class="dw-note r" style="margin-top:14px">⚠ ${over.map(d=>d.name).join(', ')} ${over.length>1?'are':'is'} overloaded — consider rebalancing.</div>`:''}
+  </div>`;
+}
+
+function tasksPanel(){
+  const t=D.tasks;
+  return `<div class="panel">
+    <div class="p-head"><div class="p-title">${icon('check','var(--cyan)')}<div><h3>Task Command</h3><div class="sub">Execution status</div></div></div><div class="chip-row"><span class="chip c-emerald">${t.completed} done</span><span class="chip c-amber">${t.inProgress} active</span><span class="chip c-red">${t.blocked} blocked</span></div></div>
+    <div class="donut-wrap">
+      <div class="donut-canvas" style="width:120px;height:120px"><canvas id="cTasks" width="120" height="120"></canvas><div class="donut-center"><div class="big" style="color:var(--cyan)">${pct(t.completed,t.total)}%</div><div class="sm">Complete</div></div></div>
+      <div class="legend">
+        <div class="leg-row"><span class="leg-dot" style="background:var(--emerald)"></span><span class="leg-lbl">Completed</span><span class="leg-val">${t.completed} <small>(${pct(t.completed,t.total)}%)</small></span></div>
+        <div class="leg-row"><span class="leg-dot" style="background:var(--accent)"></span><span class="leg-lbl">In Progress</span><span class="leg-val">${t.inProgress} <small>(${pct(t.inProgress,t.total)}%)</small></span></div>
+        <div class="leg-row"><span class="leg-dot" style="background:var(--red)"></span><span class="leg-lbl">Blocked</span><span class="leg-val">${t.blocked} <small>(${pct(t.blocked,t.total)}%)</small></span></div>
+        <div class="leg-row"><span class="leg-dot" style="background:var(--amber)"></span><span class="leg-lbl">Overdue</span><span class="leg-val" style="color:var(--amber)">${t.overdue} <small>past due</small></span></div>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--line);padding-top:6px">
+    ${t.list.map((tk,i)=>`<div class="lrow" onclick="openDrawer('task',${i})"><div class="tdot" style="background:${statusColor(tk.status)}"></div><div class="lrow-main"><div class="lrow-t">${tk.name}</div><div class="lrow-s">${tk.status} · ${tk.date}</div></div><div class="lrow-tag"><span style="font-family:var(--mono);font-size:9px;color:var(--txt-4);text-transform:uppercase;margin-right:8px">${tk.dept}</span>${statusChip(tk.status)}</div></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function ragPanel(g,a,r){
+  return `<div class="panel">
+    <div class="p-head"><div class="p-title">${icon('grid','var(--violet)')}<div><h3>Department Health</h3><div class="sub">RAG status</div></div></div><span class="chip c-emerald">${g} green · ${a} amber${r?' · '+r+' red':''}</span></div>
+    <div class="rag">${D.departments.map((d,i)=>{const c=ragColor(d.rag);const lab=d.rag==='GREEN'?'Healthy':d.rag==='AMBER'?'Attention':'Critical';return `<div class="ragc" onclick="openDrawer('department',${i})"><div class="ragc-glow" style="background:${c}"></div><div class="ragc-n">${d.name}</div><div class="ragc-s"><span class="d" style="background:${c};box-shadow:0 0 6px ${c}"></span><span style="color:${c}">${lab}</span></div><div class="ragc-stats"><div><strong>${d.staff}</strong>Staff</div><div><strong>${d.tasksPct}%</strong>Tasks</div><div><strong>${d.budgetPct}%</strong>Budget</div></div></div>`;}).join('')}</div>
+  </div>`;
+}
+
+function systemPanel(){
+  return `<div class="panel">
+    <div class="p-head"><div class="p-title">${icon('cpu','var(--teal)')}<div><h3>System Health</h3><div class="sub">Infrastructure</div></div></div><span class="chip c-emerald">All nominal</span></div>
+    ${D.it.map(s=>{const c=s.status==='ok'?'var(--emerald)':s.status==='wn'?'var(--amber)':'var(--red)';return `<div class="sys"><div class="sys-l"><span class="dot" style="background:${c};box-shadow:0 0 6px ${c}"></span>${s.name}</div><div class="sys-v" style="color:${c}">${s.value}</div></div>`;}).join('')}
+  </div>`;
+}
+
+function hiringPanel(){
+  const h=D.hiring;
+  return `<div class="panel tap" onclick="openDrawer('hiring')">
+    <div class="p-head"><div class="p-title">${icon('target','var(--violet)')}<div><h3>Hiring Pipeline</h3><div class="sub">Recruitment</div></div></div><span class="chip c-violet">${h.openRoles} open roles</span></div>
+    <div class="pipe">${h.pipeline.map((p,i,a)=>{const c=i===a.length-1?'var(--emerald)':i===a.length-2?'var(--amber)':'var(--accent)';return `<div class="pipe-s"><div class="pipe-v" style="color:${c}">${p.count}</div><div class="pipe-l">${p.stage}</div></div>`;}).join('')}</div>
+    ${(h.deptRoles||[]).map(r=>`<div class="bar"><div class="bar-top"><span class="bar-lbl">${r.dept}</span><span class="bar-val">${r.count}</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct(r.count,h.openRoles)}%;background:linear-gradient(90deg,var(--violet),#b89bff)"></div></div></div>`).join('')}
+    <div class="mini-row">
+      <div class="mini" style="border-top-color:var(--accent)"><div class="mini-v" style="color:var(--accent)">${h.avgDays}</div><div class="mini-l">Days to hire</div></div>
+      <div class="mini" style="border-top-color:var(--amber)"><div class="mini-v" style="color:var(--amber)">${h.offersPending}</div><div class="mini-l">Offers out</div></div>
+      <div class="mini" style="border-top-color:var(--emerald)"><div class="mini-v" style="color:var(--emerald)">${h.conversionPct}%</div><div class="mini-l">Conversion</div></div>
+    </div>
+  </div>`;
+}
+
+function annPanel(){
+  return `<div class="panel">
+    <div class="p-head"><div class="p-title">${icon('mega','var(--accent)')}<div><h3>Announcements</h3><div class="sub">Company-wide</div></div></div><span class="chip c-accent">${D.announcements.length} active</span></div>
+    ${D.announcements.map(a=>{const c=a.type==='INFO'?'var(--accent)':a.type==='WARNING'?'var(--amber)':'var(--emerald)';return `<div class="ann" style="border-left-color:${c}"><div class="ann-t">${a.title}</div><div class="ann-b">${a.body}</div><div class="ann-m">${a.date} · BY ${a.by}</div></div>`;}).join('')}
+  </div>`;
+}
+
+function eventsPanel(){
+  return `<div class="panel">
+    <div class="p-head"><div class="p-title">${icon('cal','var(--teal)')}<div><h3>Upcoming Events</h3><div class="sub">Next 30 days</div></div></div><span class="chip c-mute">${D.events.length} events</span></div>
+    ${D.events.map(e=>{const c=e.type==='HOLIDAY'?'var(--red)':e.type==='DEADLINE'?'var(--amber)':e.type==='MEETING'?'var(--accent)':e.type==='PAYROLL'?'var(--emerald)':'var(--violet)';return `<div class="ev"><div class="ev-date" style="border-color:${c}33"><div class="ev-d" style="color:${c}">${e.day}</div><div class="ev-mo">${e.month}</div></div><div class="ev-main"><div class="ev-t">${e.title}</div><div class="ev-s">${e.dept} · ${e.type}</div></div></div>`;}).join('')}
+  </div>`;
+}
+// ════ CHARTS ════
+function drawBudget(){const c=document.getElementById('cBudget');if(!c)return;const ctx=c.getContext('2d');const tgt=D.finance.budgetSpent/D.finance.budgetTotal;let p=0;
+  (function a(){ctx.clearRect(0,0,108,108);ctx.beginPath();ctx.arc(54,54,42,0,Math.PI*2);ctx.strokeStyle='rgba(148,170,210,0.08)';ctx.lineWidth=8;ctx.stroke();
+  ctx.beginPath();ctx.arc(54,54,42,-Math.PI/2,-Math.PI/2+p*Math.PI*2);const g=ctx.createLinearGradient(12,54,96,54);g.addColorStop(0,'#e0a93a');g.addColorStop(1,'#f5c451');ctx.strokeStyle=g;ctx.lineWidth=8;ctx.lineCap='round';ctx.stroke();
+  const an=-Math.PI/2+p*Math.PI*2;ctx.beginPath();ctx.arc(54+42*Math.cos(an),54+42*Math.sin(an),3.5,0,Math.PI*2);ctx.fillStyle='#f5c451';ctx.fill();
+  if(p<tgt){p=Math.min(p+0.025,tgt);requestAnimationFrame(a);}})();}
+
+function drawSpend(){const e=document.getElementById('cSpend');if(!e)return;if(charts.spend)charts.spend.destroy();
+  charts.spend=new Chart(e.getContext('2d'),{type:'line',data:{labels:D.finance.monthlySpend.map(m=>m.month),datasets:[{data:D.finance.monthlySpend.map(m=>m.val),borderColor:'#5b9dff',backgroundColor:'rgba(91,157,255,0.08)',borderWidth:2,fill:true,tension:0.4,pointRadius:0,pointHoverRadius:4,pointBackgroundColor:'#5b9dff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>' '+D.finance.currency+' '+x.raw+'K'}}},scales:{x:{ticks:{color:'#5d6b8a',font:{size:9,family:'JetBrains Mono'}},grid:{display:false}},y:{display:false}}}});}
+
+function drawHC(){const e=document.getElementById('cHC');if(!e)return;if(charts.hc)charts.hc.destroy();const v=D.workforce.history.map(h=>h.val);
+  charts.hc=new Chart(e.getContext('2d'),{type:'bar',data:{labels:D.workforce.history.map(h=>h.month),datasets:[{data:v,backgroundColor:'rgba(91,157,255,0.25)',borderColor:'#5b9dff',borderWidth:1.5,borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#5d6b8a',font:{size:9,family:'JetBrains Mono'}},grid:{display:false}},y:{min:Math.min(...v)-6,display:false}}}});}
+
+function drawTasks(){const e=document.getElementById('cTasks');if(!e)return;if(charts.tasks)charts.tasks.destroy();const t=D.tasks;
+  charts.tasks=new Chart(e.getContext('2d'),{type:'doughnut',data:{labels:['Completed','In Progress','Blocked','Overdue'],datasets:[{data:[t.completed,t.inProgress,t.blocked,t.overdue],backgroundColor:['#34e0a1','#5b9dff','#ff5a72','#ffb443'],borderWidth:0,hoverOffset:4}]},options:{responsive:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>' '+x.label+': '+x.raw}}},animation:{duration:1100}}});}
+
+function drawRisk(){const e=document.getElementById('cRisk');if(!e)return;if(charts.risk)charts.risk.destroy();
+  const col={HIGH:'rgba(255,90,114,0.55)',MEDIUM:'rgba(255,180,67,0.55)',LOW:'rgba(52,224,161,0.5)'},bor={HIGH:'#ff5a72',MEDIUM:'#ffb443',LOW:'#34e0a1'};
+  charts.risk=new Chart(e.getContext('2d'),{type:'bubble',data:{datasets:D.risks.map(r=>({label:r.title,data:[{x:r.likelihood,y:r.impact,r:9}],backgroundColor:col[r.level]||'rgba(91,157,255,0.5)',borderColor:bor[r.level]||'#5b9dff',borderWidth:1.5}))},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:4,right:8}},plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>x.dataset.label}}},scales:{x:{min:0,max:10,title:{display:true,text:'LIKELIHOOD',color:'#5d6b8a',font:{size:8,family:'JetBrains Mono'}},ticks:{color:'#5d6b8a',font:{size:8}},grid:{color:'rgba(148,170,210,0.05)'}},y:{min:0,max:10,title:{display:true,text:'IMPACT',color:'#5d6b8a',font:{size:8,family:'JetBrains Mono'}},ticks:{color:'#5d6b8a',font:{size:8}},grid:{color:'rgba(148,170,210,0.05)'}}}}});}
+
+function drawSparks(){
+  document.querySelectorAll('.kpi-spark').forEach(cv=>{
+    const ctx=cv.getContext('2d');const color=cv.dataset.color;
+    const data=[3,5,4,7,6,9,8,11,10,13];const w=54,h=24,mx=Math.max(...data),mn=Math.min(...data);
+    ctx.clearRect(0,0,w,h);ctx.beginPath();
+    data.forEach((v,i)=>{const x=i/(data.length-1)*w;const y=h-((v-mn)/(mx-mn))*(h-4)-2;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+    ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.lineJoin='round';ctx.stroke();
+    const lx=w,ly=h-((data[data.length-1]-mn)/(mx-mn))*(h-4)-2;
+    ctx.beginPath();ctx.arc(lx-1,ly,2,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+  });
+}
+
+// ════ DRAWER ════
+function openDrawer(type,idx=0){
+  const dw=document.getElementById('drawer'),sc=document.getElementById('scrim');
+  let t='',s='',b='';
+  const F=D.finance,W=D.workforce;
+  if(type==='finance'){const sp=pct(F.budgetSpent,F.budgetTotal);t='Budget Intelligence';s='Full financial breakdown';
+    b=sec('Overview',[['Total Budget',`${F.currency} ${fmt(F.budgetTotal)}`,'c'],['Spent to Date',`${F.currency} ${fmt(F.budgetSpent)}`,'r'],['Remaining',`${F.currency} ${fmt(F.budgetTotal-F.budgetSpent)}`,'g'],['Utilization',sp+'%',sp>80?'a':''],['Period',F.period,''],['Forecast Exhaust',F.forecastDate,'a']])
+    +sec('By Department',F.deptBudgets.map(d=>[d.name,d.pct+'%',d.pct>80?'a':d.pct>60?'':'g']))
+    +sec(`Monthly Spend · ${F.currency} '000`,F.monthlySpend.map(m=>[m.month,fmt(m.val)+'K','']));}
+  else if(type==='workforce'||type==='presence'){t='Workforce Intelligence';s='Headcount breakdown';
+    b=sec("Today's Presence",[['Total Active',W.total,'c'],['On-Site',`${W.onSite} (${pct(W.onSite,W.total)}%)`,'g'],['Remote / WFH',W.remote,'c'],['On Mission',W.onMission,'a'],['Sick Leave',W.sickLeave,'r'],['Annual Leave',W.annualLeave,''],['Other',W.other,'']])
+    +sec('Monthly Metrics',[['New Hires','+'+W.newHires,'g'],['Departures',W.departures,'r'],['Net Change',(W.newHires-W.departures>=0?'+':'')+(W.newHires-W.departures),W.newHires-W.departures>=0?'g':'r'],['Avg Hours/Week',W.avgHrs,''],['Attrition Rate',W.attrition+'%',W.attrition>5?'r':W.attrition>3?'a':'g'],['Attendance',W.attendance+'%','g']])
+    +sec('Headcount History',W.history.map(h=>[h.month,h.val,'']));}
+  else if(type==='mission'){const m=D.missions[idx];t='Mission Detail';s=m.name;
+    b=sec('Assignment',[['Employee',m.name,''],['Destination',m.destination,'c'],['Purpose',m.purpose,''],['Departure',m.from,''],['Return',m.to,''],['Status',m.status,m.status==='OVERDUE'?'r':m.status==='RETURN'?'g':'a']])
+    +(m.status==='OVERDUE'?note('r','This mission has exceeded the standard 7-day limit. Manager review and confirmation of return is required.'):'');}
+  else if(type==='tasks'){const t2=D.tasks;t='Task Command';s='Execution breakdown';
+    b=sec('Summary',[['Total Tasks',t2.total,''],['Completed',`${t2.completed} (${pct(t2.completed,t2.total)}%)`,'g'],['In Progress',`${t2.inProgress} (${pct(t2.inProgress,t2.total)}%)`,'c'],['Blocked',`${t2.blocked} (${pct(t2.blocked,t2.total)}%)`,'r'],['Overdue',t2.overdue+' — needs attention','a']])
+    +secItems('Task List',t2.list.map(tk=>({t:tk.name,m:[tk.dept,tk.status,tk.date]})));}
+  else if(type==='task'){const tk=D.tasks.list[idx];t='Task Detail';s=tk.name;
+    b=sec('Info',[['Name',tk.name,''],['Department',tk.dept,'c'],['Status',tk.status,tk.status==='DONE'?'g':tk.status==='BLOCKED'?'r':tk.status==='OVERDUE'?'a':'c'],['Date / Note',tk.date,'']])
+    +(tk.status==='BLOCKED'?note('r','This task is blocked. Escalation or management intervention may be needed.'):'')+(tk.status==='OVERDUE'?note('a','This task has passed its deadline. Immediate review recommended.'):'');}
+  else if(type==='decisions'){t='Decisions Pending';s='Awaiting approval';const avg=Math.round(D.decisions.reduce((x,d)=>x+d.days,0)/D.decisions.length*10)/10;
+    b=sec('Summary',[['Total Pending',D.decisions.length,'r'],['Urgent',D.decisions.filter(x=>x.priority==='URGENT').length,'r'],['Medium',D.decisions.filter(x=>x.priority==='MEDIUM').length,'a'],['Avg Days Waiting',avg+' days','a']])
+    +secItems('All Items',D.decisions.map(d=>({t:d.title,m:[d.priority,d.owner,d.days+'d']})));}
+  else if(type==='decision'){const d=D.decisions[idx];t='Decision Detail';s=d.type;
+    b=sec('Info',[['Type',d.type,'c'],['Description',d.title,''],['Owner',d.owner,''],['Days Waiting',d.days+' days',d.days>=4?'r':d.days>=2?'a':'g'],['Priority',d.priority,d.priority==='URGENT'?'r':d.priority==='MEDIUM'?'a':'c']]);}
+  else if(type==='departments'){t='Department Health';s='All RAG status';
+    b=sec('Overview',[['Departments',D.departments.length,''],['Green',D.departments.filter(d=>d.rag==='GREEN').length,'g'],['Amber',D.departments.filter(d=>d.rag==='AMBER').length,'a'],['Red',D.departments.filter(d=>d.rag==='RED').length,'r'],['Total Staff',D.departments.reduce((s,d)=>s+d.staff,0),'c']])
+    +secItems('By Department',D.departments.map(d=>({t:d.name+' — '+d.rag,m:['Staff '+d.staff,'Tasks '+d.tasksPct+'%','Budget '+d.budgetPct+'%','Util '+d.utilization+'%']})));}
+  else if(type==='department'){const d=D.departments[idx];t='Department Detail';s=d.name;
+    b=sec('Health Status',[['RAG Status',d.rag,d.rag==='GREEN'?'g':d.rag==='AMBER'?'a':'r'],['Staff Count',d.staff,'c'],['Tasks Done',d.tasksPct+'%',d.tasksPct>=80?'g':d.tasksPct>=60?'a':'r'],['Budget Used',d.budgetPct+'%',d.budgetPct>=80?'a':''],['Utilization',d.utilization+'% — '+(d.utilization>=90?'Overloaded':d.utilization>=75?'High':'Optimal'),d.utilization>=90?'r':d.utilization>=75?'a':'g']])
+    +((d.rag!=='GREEN')?note('a','This department requires management attention. Review tasks and resource allocation.'):'');}
+  else if(type==='risk'){const r=D.risks[idx];t='Risk Detail';s='Score '+r.score+'/10';
+    b=sec('Info',[['Risk',r.title,''],['Owner',r.owner,'c'],['Level',r.level,r.level==='HIGH'?'r':r.level==='MEDIUM'?'a':'g'],['Likelihood',r.likelihood+'/10','a'],['Impact',r.impact+'/10','r'],['Score',r.score+'/10',r.level==='HIGH'?'r':r.level==='MEDIUM'?'a':'g']])
+    +sec('Mitigation',[]).replace('</div>',`<div class="dw-note a" style="background:var(--panel-3);border-color:var(--line);color:var(--txt-2)">${r.mitigation}</div></div>`);}
+  else if(type==='hiring'){const h=D.hiring;t='Hiring Pipeline';s='Recruitment breakdown';
+    b=sec('Pipeline',h.pipeline.map(p=>[p.stage,p.count,'c']))
+    +sec('Metrics',[['Open Roles',h.openRoles,''],['Avg Time-to-Hire',h.avgDays+' days','c'],['Offers Pending',h.offersPending,'a'],['Conversion Rate',h.conversionPct+'%','g']])
+    +sec('By Department',(h.deptRoles||[]).map(r=>[r.dept,r.count+' role'+(r.count!==1?'s':''),'']));}
+  document.getElementById('dw-title').textContent=t;
+  document.getElementById('dw-sub').textContent=s;
+  document.getElementById('dw-body').innerHTML=b;
+  dw.classList.add('open');sc.classList.add('on');
+}
+function sec(title,rows){return `<div class="dw-sec"><div class="dw-sec-t">${title}</div>${rows.map(([l,v,c])=>`<div class="dw-stat"><span class="dw-stat-l">${l}</span><span class="dw-stat-v ${c||''}">${v}</span></div>`).join('')}</div>`;}
+function secItems(title,items){return `<div class="dw-sec"><div class="dw-sec-t">${title}</div>${items.map(it=>`<div class="dw-item"><div class="dw-item-t">${it.t}</div><div class="dw-item-m">${it.m.map(x=>`<span>${x}</span>`).join('<span>·</span>')}</div></div>`).join('')}</div>`;}
+function note(c,txt){return `<div class="dw-note ${c}">⚠ ${txt}</div>`;}
+function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('scrim').classList.remove('on');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();}});
+// ════════════════════════════════════════════
+// OFFLINE AI ASSISTANT — natural-language query engine
+// ════════════════════════════════════════════
+let aiOpen=false;
+function toggleAI(){aiOpen=!aiOpen;document.getElementById('ai-panel').classList.toggle('open',aiOpen);if(aiOpen)setTimeout(()=>document.getElementById('ai-input').focus(),300);}
+
+const SUGGESTIONS=[
+  "How much budget is left?",
+  "Who is on mission?",
+  "What needs my approval?",
+  "Show overdue tasks",
+  "Which team is overloaded?",
+  "What are the top risks?",
+  "How many people are on-site?",
+  "Department health summary"
+];
+
+function initAI(){
+  const body=document.getElementById('ai-body');
+  body.innerHTML='';
+  botSay(`Hello — I'm your NEXUS assistant. I read directly from your loaded data and work completely offline. Ask me anything about <b>budget</b>, <b>people</b>, <b>tasks</b>, <b>missions</b>, <b>risks</b>, <b>decisions</b>, or <b>departments</b>.`);
+  renderSuggestions();
+}
+function renderSuggestions(){
+  const s=document.getElementById('ai-suggest');
+  const picks=SUGGESTIONS.slice().sort(()=>Math.random()-0.5).slice(0,4);
+  s.innerHTML=picks.map(q=>`<button class="ai-chip" onclick="askChip('${q.replace(/'/g,"\\'")}')">${q}</button>`).join('');
+}
+function askChip(q){document.getElementById('ai-input').value=q;aiSend();}
+
+function botSay(html){
+  const body=document.getElementById('ai-body');
+  const d=document.createElement('div');d.className='ai-msg bot';
+  d.innerHTML=`<div class="ai-msg-av"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 015 5v1a5 5 0 01-5 5 5 5 0 01-5-5V7a5 5 0 015-5z"/><path d="M12 13v3m-4 5h8a2 2 0 002-2 5 5 0 00-5-5h-2a5 5 0 00-5 5 2 2 0 002 2z"/></svg></div><div class="ai-bubble">${html}</div>`;
+  body.appendChild(d);body.scrollTop=body.scrollHeight;
+}
+function userSay(txt){
+  const body=document.getElementById('ai-body');
+  const d=document.createElement('div');d.className='ai-msg user';
+  d.innerHTML=`<div class="ai-msg-av">YOU</div><div class="ai-bubble">${txt}</div>`;
+  body.appendChild(d);body.scrollTop=body.scrollHeight;
+}
+function showTyping(){
+  const body=document.getElementById('ai-body');
+  const d=document.createElement('div');d.className='ai-msg bot';d.id='typing';
+  d.innerHTML=`<div class="ai-msg-av"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 015 5v1a5 5 0 01-5 5 5 5 0 01-5-5V7a5 5 0 015-5z"/></svg></div><div class="ai-bubble"><div class="ai-typing"><span></span><span></span><span></span></div></div>`;
+  body.appendChild(d);body.scrollTop=body.scrollHeight;
+}
+function hideTyping(){const t=document.getElementById('typing');if(t)t.remove();}
+
+function aiSend(){
+  const inp=document.getElementById('ai-input');
+  const q=inp.value.trim();if(!q)return;
+  userSay(q);inp.value='';
+  showTyping();
+  setTimeout(()=>{hideTyping();botSay(answer(q));renderSuggestions();},500+Math.random()*400);
+}
+
+function M(v){return `<span class="metric">${v}</span>`;}
+
+// ── The query engine ──
+function answer(raw){
+  const q=raw.toLowerCase();
+  const F=D.finance,W=D.workforce;
+  const has=(...words)=>words.some(w=>q.includes(w));
+
+  // GREETINGS
+  if(has('hello','hi ','hey','greetings')&&q.length<12) return `Hello — ready when you are. Try asking about budget, staff, or what needs your approval.`;
+  if(has('thank','thanks')) return `You're welcome. Anything else you'd like to check?`;
+  if(has('help','what can you')) return `I can answer questions about your live data, such as:<ul><li><span class="li-dot">→</span>Budget spent, remaining, and forecast</li><li><span class="li-dot">→</span>Headcount, who's on-site, remote, or on leave</li><li><span class="li-dot">→</span>Tasks completed, blocked, or overdue</li><li><span class="li-dot">→</span>Active missions and travel</li><li><span class="li-dot">→</span>Pending decisions and risks</li><li><span class="li-dot">→</span>Department health and capacity</li></ul>`;
+
+  // BUDGET
+  if(has('budget','spend','spent','money','cost','financ','fund')){
+    const sp=pct(F.budgetSpent,F.budgetTotal),rem=F.budgetTotal-F.budgetSpent;
+    if(has('left','remain','remaining'))
+      return `You have ${M(F.currency+' '+fmt(rem))} remaining — that's ${M((100-sp)+'%')} of the total ${M(F.currency+' '+fmt(F.budgetTotal))} budget. At the current burn rate, funds are forecast to be exhausted by <b>${F.forecastDate}</b>.`;
+    if(has('forecast','run out','exhaust','when'))
+      return `At the current spending rate, the budget is forecast to be exhausted by <b>${F.forecastDate}</b>. You've used ${M(sp+'%')} so far, with ${M(F.currency+' '+fmt(rem))} still available.`;
+    if(has('department','dept','breakdown','by team')){
+      const top=F.deptBudgets.slice().sort((a,b)=>b.pct-a.pct);
+      return `Here's budget usage by department:<ul>${top.map(d=>`<li><span class="li-dot">${d.pct>=80?'🔴':d.pct>=60?'🟡':'🟢'}</span><b>${d.name}</b> — ${d.pct}% used</li>`).join('')}</ul>${top[0].pct>=80?`<b>${top[0].name}</b> is the highest at ${top[0].pct}% — worth watching.`:''}`;
+    }
+    return `Budget status: ${M(sp+'%')} utilized. You've spent ${M(F.currency+' '+fmt(F.budgetSpent))} of ${M(F.currency+' '+fmt(F.budgetTotal))}, leaving ${M(F.currency+' '+fmt(rem))}. Forecast exhaust date is <b>${F.forecastDate}</b>.`;
+  }
+
+  // PRESENCE / ON-SITE
+  if(has('on-site','onsite','on site','in office','present','in the office')){
+    return `Right now ${M(W.onSite)} employees are on-site — that's ${M(pct(W.onSite,W.total)+'%')} of your ${M(W.total)}-person workforce. Another ${M(W.remote)} are working remotely and ${M(W.onMission)} are on mission.`;
+  }
+  if(has('remote','wfh','work from home','working from home')){
+    return `${M(W.remote)} employees are working remotely today, alongside ${M(W.onSite)} on-site and ${M(W.onMission)} on mission.`;
+  }
+  if(has('leave','sick','absent','off ')){
+    return `Currently ${M(W.sickLeave)} on sick leave and ${M(W.annualLeave)} on annual leave (${M(W.sickLeave+W.annualLeave)} total away). Attendance rate is ${M(W.attendance+'%')}.`;
+  }
+
+  // MISSIONS
+  if(has('mission','travel','field','deploy','away','trip')){
+    const active=D.missions.filter(m=>m.status!=='RETURN');
+    const overdue=D.missions.filter(m=>m.status==='OVERDUE');
+    let r=`${M(D.missions.length)} people are currently on mission:<ul>${D.missions.map(m=>`<li><span class="li-dot">${m.status==='OVERDUE'?'🔴':'📍'}</span><b>${m.name}</b> — ${m.destination} (${m.purpose}), ${m.from}→${m.to}</li>`).join('')}</ul>`;
+    if(overdue.length) r+=`<br>⚠ <b>${overdue.length} mission${overdue.length>1?'s have':' has'}</b> exceeded the 7-day limit and need${overdue.length>1?'':'s'} review: ${overdue.map(m=>m.name).join(', ')}.`;
+    return r;
+  }
+
+  // DECISIONS / APPROVAL
+  if(has('approv','decision','pending','sign off','sign-off','waiting','my desk','action')){
+    const urg=D.decisions.filter(d=>d.priority==='URGENT');
+    let r=`You have ${M(D.decisions.length)} decisions awaiting approval`;
+    if(urg.length) r+=`, including ${M(urg.length+' urgent')}`;
+    r+=`:<ul>${D.decisions.map(d=>`<li><span class="li-dot">${d.priority==='URGENT'?'🔴':d.priority==='MEDIUM'?'🟡':'🔵'}</span><b>${d.title}</b> — ${d.owner}, waiting ${d.days}d</li>`).join('')}</ul>`;
+    if(urg.length) r+=`<br>I'd prioritise the urgent items first — the longest has been waiting ${Math.max(...D.decisions.map(d=>d.days))} days.`;
+    return r;
+  }
+
+  // TASKS
+  if(has('task','overdue','blocked','complete','pending work','progress','project status')){
+    const t=D.tasks;
+    if(has('overdue')){
+      const od=t.list.filter(x=>x.status==='OVERDUE');
+      return `There ${t.overdue===1?'is':'are'} ${M(t.overdue)} overdue task${t.overdue!==1?'s':''} past deadline.${od.length?` For example: <b>${od[0].name}</b> (${od[0].dept}).`:''} These need immediate attention.`;
+    }
+    if(has('blocked')){
+      const bl=t.list.filter(x=>x.status==='BLOCKED');
+      return `${M(t.blocked)} task${t.blocked!==1?'s are':' is'} currently blocked.${bl.length?` Top item: <b>${bl[0].name}</b> — ${bl[0].date}.`:''} These may need escalation.`;
+    }
+    return `Task status: ${M(t.completed)} completed (${pct(t.completed,t.total)}%), ${M(t.inProgress)} in progress, ${M(t.blocked)} blocked, and ${M(t.overdue)} overdue — out of ${M(t.total)} total. ${t.blocked+t.overdue>0?`<br>⚠ ${t.blocked+t.overdue} items need attention (blocked or overdue).`:'Everything is on track.'}`;
+  }
+
+  // RISKS
+  if(has('risk','threat','exposure','danger','concern')){
+    const high=D.risks.filter(r=>r.level==='HIGH');
+    return `There ${D.risks.length===1?'is':'are'} ${M(D.risks.length)} active risk${D.risks.length!==1?'s':''} on the register:<ul>${D.risks.map(r=>`<li><span class="li-dot">${r.level==='HIGH'?'🔴':r.level==='MEDIUM'?'🟡':'🟢'}</span><b>${r.title}</b> (score ${r.score}/10) — owned by ${r.owner}</li>`).join('')}</ul>${high.length?`<br>The highest priority is <b>${high[0].title}</b>. Mitigation: ${high[0].mitigation}.`:''}`;
+  }
+
+  // HEADCOUNT
+  if(has('headcount','how many people','how many employ','total staff','total employ','workforce size','team size')){
+    return `Total headcount is ${M(W.total)} active employees. This month: ${M('+'+W.newHires)} new hires, ${M(W.departures)} departure${W.departures!==1?'s':''} (net ${W.newHires-W.departures>=0?'+':''}${W.newHires-W.departures}). Attrition rate is ${M(W.attrition+'%')}.`;
+  }
+
+  // CAPACITY / OVERLOAD
+  if(has('overload','capacity','utiliz','busy','stretched','workload','overworked')){
+    const over=D.departments.filter(d=>d.utilization>=90).sort((a,b)=>b.utilization-a.utilization);
+    const high=D.departments.filter(d=>d.utilization>=75&&d.utilization<90);
+    const low=D.departments.filter(d=>d.utilization<50);
+    let r='';
+    if(over.length) r+=`⚠ ${over.map(d=>`<b>${d.name}</b> (${d.utilization}%)`).join(', ')} ${over.length>1?'are':'is'} overloaded. `;
+    if(high.length) r+=`${high.map(d=>d.name+' ('+d.utilization+'%)').join(', ')} ${high.length>1?'are':'is'} running high. `;
+    if(low.length) r+=`<br>${low.map(d=>d.name).join(', ')} ${low.length>1?'have':'has'} spare capacity${over.length?' — you could rebalance work here.':'.'}`;
+    return r||`All departments are operating within healthy capacity ranges.`;
+  }
+
+  // DEPARTMENTS / HEALTH
+  if(has('department','dept','health','rag','status summary','how are we','overview','team')){
+    const g=D.departments.filter(d=>d.rag==='GREEN').length,a=D.departments.filter(d=>d.rag==='AMBER').length,r2=D.departments.filter(d=>d.rag==='RED').length;
+    const attention=D.departments.filter(d=>d.rag!=='GREEN');
+    let r=`Across ${M(D.departments.length)} departments: ${M(g+' green')}, ${M(a+' amber')}${r2?', '+M(r2+' red'):''}.`;
+    if(attention.length) r+=`<br>Needs attention:<ul>${attention.map(d=>`<li><span class="li-dot">${d.rag==='AMBER'?'🟡':'🔴'}</span><b>${d.name}</b> — tasks at ${d.tasksPct}%, utilization ${d.utilization}%</li>`).join('')}</ul>`;
+    else r+=` Everything is healthy.`;
+    return r;
+  }
+
+  // HIRING
+  if(has('hir','recruit','candidate','open role','vacanc','pipeline','offer')){
+    const h=D.hiring;
+    return `Recruitment: ${M(h.openRoles+' open roles')} with ${M(h.pipeline.reduce((s,p)=>s+p.count,0)+' candidates')} in the pipeline. ${M(h.offersPending+' offers')} are pending, average time-to-hire is ${M(h.avgDays+' days')}, and conversion rate is ${M(h.conversionPct+'%')}.`;
+  }
+
+  // IT / SYSTEMS
+  if(has('system','it ','uptime','server','network','ticket','backup','cyber','security')){
+    const tickets=D.it.find(x=>x.name.toLowerCase().includes('ticket'));
+    const alerts=D.it.find(x=>x.name.toLowerCase().includes('alert'));
+    return `Systems are operating normally. ${tickets?`There ${tickets.value==='1'?'is':'are'} ${M(tickets.value)} open IT ticket${tickets.value!=='1'?'s':''}`:''}${alerts?` and ${M(alerts.value)} critical alert${alerts.value!=='1'?'s':''}`:''}. All core services are operational and backups are current.`;
+  }
+
+  // EVENTS
+  if(has('event','calendar','upcoming','schedule','meeting','holiday','deadline')){
+    return `Upcoming events:<ul>${D.events.slice(0,5).map(e=>`<li><span class="li-dot">📅</span><b>${e.title}</b> — ${e.month} ${e.day} (${e.dept})</li>`).join('')}</ul>`;
+  }
+
+  // SUMMARY / BRIEF
+  if(has('summary','brief','overview','snapshot','everything','status','how is everything','catch me up','rundown')){
+    const sp=pct(F.budgetSpent,F.budgetTotal);
+    const urg=D.decisions.filter(d=>d.priority==='URGENT').length;
+    const overdueM=D.missions.filter(m=>m.status==='OVERDUE').length;
+    return `Here's your executive snapshot:<ul>
+      <li><span class="li-dot">💰</span>Budget ${M(sp+'%')} used, ${M(F.currency+' '+fmt(F.budgetTotal-F.budgetSpent))} left</li>
+      <li><span class="li-dot">👥</span>${M(W.total)} staff · ${M(W.onSite)} on-site · ${M(W.attendance+'%')} attendance</li>
+      <li><span class="li-dot">✅</span>Tasks ${M(pct(D.tasks.completed,D.tasks.total)+'%')} done · ${M(D.tasks.blocked+' blocked')} · ${M(D.tasks.overdue+' overdue')}</li>
+      <li><span class="li-dot">⚖️</span>${M(D.decisions.length)} decisions pending${urg?` (${urg} urgent)`:''}</li>
+      <li><span class="li-dot">⚠️</span>${M(D.risks.length)} active risks · ${M(D.missions.length+' on mission')}${overdueM?` (${overdueM} overdue)`:''}</li>
+    </ul>${urg||overdueM||D.tasks.blocked?`<b>Priorities:</b> ${[urg?urg+' urgent approvals':'',overdueM?overdueM+' overdue missions':'',D.tasks.blocked?D.tasks.blocked+' blocked tasks':''].filter(Boolean).join(', ')}.`:'Everything looks on track.'}`;
+  }
+
+  // FALLBACK
+  return `I'm not sure I caught that. I can help with <b>budget</b>, <b>headcount</b>, <b>tasks</b>, <b>missions</b>, <b>decisions</b>, <b>risks</b>, <b>departments</b>, <b>hiring</b>, or <b>systems</b>. Try one of the suggestions below, or ask for a "summary".`;
+}
+// Apply branding to the landing screen as soon as the page loads
+applyConfig();
+</script>
+</body>
+</html>

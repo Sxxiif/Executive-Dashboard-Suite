@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATLAS — Executive Briefing</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Newsreader:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+:root{
+  --paper:#f4f1ea;--paper-2:#efebe2;--card:#fbfaf6;--ink:#1c1a17;--ink-2:#4a453d;--ink-3:#8a8276;--ink-4:#b5ad9e;
+  --rule:#ddd6c8;--rule-2:#cabfab;
+  --accent:#9a3b2e;--accent-2:#7d2f24;--accent-soft:#f0e0db;
+  --gold:#a8852c;--green:#3f6b4d;--green-soft:#e2ebe2;
+  --amber:#b67a1f;--amber-soft:#f3e8d2;--red:#a13428;--red-soft:#f0ddd8;--blue:#3a5a7d;--blue-soft:#dde6ef;
+  --serif:'Fraunces',Georgia,serif;--read:'Newsreader',Georgia,serif;--mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--read);background:var(--paper);color:var(--ink);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;z-index:0;background-image:radial-gradient(circle at 50% 0%,rgba(0,0,0,0.02),transparent 70%);pointer-events:none}
+::-webkit-scrollbar{width:11px}::-webkit-scrollbar-track{background:var(--paper-2)}::-webkit-scrollbar-thumb{background:var(--rule-2);border-radius:0;border:3px solid var(--paper-2)}
+
+/* LANDING */
+#landing{position:fixed;inset:0;z-index:9999;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center}
+#landing.hidden{display:none}
+.l-rule{width:64px;height:2px;background:var(--accent);margin-bottom:28px}
+.l-kicker{font-family:var(--mono);font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px}
+.l-logo{font-family:var(--serif);font-size:72px;font-weight:900;letter-spacing:-2px;color:var(--ink);line-height:0.9;margin-bottom:18px;font-variation-settings:'opsz' 144}
+.l-sub{font-family:var(--read);font-style:italic;font-size:19px;color:var(--ink-2);margin-bottom:6px}
+.l-meta{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--ink-4);text-transform:uppercase;margin-bottom:44px}
+.dz{width:500px;max-width:90vw;background:var(--card);border:1px solid var(--rule);padding:46px 40px;display:flex;flex-direction:column;align-items:center;gap:16px;cursor:pointer;transition:all 0.3s;position:relative}
+.dz::before{content:'';position:absolute;inset:6px;border:1px solid var(--rule);pointer-events:none}
+.dz:hover,.dz.over{border-color:var(--accent);box-shadow:0 16px 40px rgba(28,26,23,0.1)}
+.dz-ic{width:52px;height:52px;border:1.5px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.dz-ic svg{width:24px;height:24px;stroke:var(--accent);fill:none;stroke-width:1.6}
+.dz-h{font-family:var(--serif);font-size:20px;font-weight:600;color:var(--ink)}
+.dz-p{font-size:14px;color:var(--ink-3);text-align:center;line-height:1.6;font-style:italic}
+.dz-p b{color:var(--accent);font-weight:600;font-style:normal}
+.btn{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--paper);background:var(--accent);border:none;padding:12px 28px;cursor:pointer;transition:all 0.2s}
+.btn:hover{background:var(--accent-2)}
+#fi{display:none}
+.btn-ghost{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-3);background:transparent;border:none;padding:10px;cursor:pointer;margin-top:22px;border-bottom:1px solid var(--rule);transition:all 0.2s}
+.btn-ghost:hover{color:var(--accent);border-color:var(--accent)}
+.l-err{font-size:13px;color:var(--red);min-height:18px;margin-top:14px;font-style:italic}
+.l-credit{position:absolute;bottom:32px;font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--ink-4);text-transform:uppercase}
+.l-credit b{color:var(--accent);font-weight:600}
+
+/* MASTHEAD */
+.masthead{position:relative;z-index:1;background:var(--paper);border-bottom:3px double var(--ink);padding:18px 48px 16px}
+.mast-top{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-3);padding-bottom:14px;border-bottom:1px solid var(--rule);margin-bottom:14px}
+.mast-edition{display:flex;gap:18px}
+.mast-main{display:flex;justify-content:space-between;align-items:flex-end}
+.mast-title{font-family:var(--serif);font-size:46px;font-weight:900;letter-spacing:-2px;color:var(--ink);line-height:0.9;font-variation-settings:'opsz' 144}
+.mast-title small{display:block;font-family:var(--read);font-style:italic;font-size:15px;font-weight:400;letter-spacing:0;color:var(--ink-3);margin-top:6px}
+.mast-right{text-align:right}
+.mast-clock{font-family:var(--mono);font-size:13px;color:var(--ink-2);font-weight:500}
+.mast-status{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--green);margin-top:4px;display:flex;align-items:center;gap:6px;justify-content:flex-end}
+.mast-status .dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+/* NAV */
+.atlas-nav{position:sticky;top:0;z-index:40;background:var(--paper);border-bottom:1px solid var(--ink);padding:0 48px;display:flex;align-items:center;justify-content:space-between}
+.nav-tabs{display:flex}
+.nav-tab{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);background:transparent;border:none;border-bottom:2px solid transparent;padding:15px 22px;cursor:pointer;transition:all 0.2s}
+.nav-tab:hover{color:var(--ink)}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.nav-right{display:flex;align-items:center;gap:8px}
+.nav-period{display:flex;border:1px solid var(--rule)}
+.nav-period button{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--ink-3);background:transparent;border:none;padding:7px 13px;cursor:pointer;transition:all 0.2s}
+.nav-period button.active{background:var(--ink);color:var(--paper)}
+.nav-reload{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--ink-2);background:transparent;border:1px solid var(--rule);padding:7px 13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s}
+.nav-reload:hover{border-color:var(--accent);color:var(--accent)}
+.nav-reload svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+/* CONTENT */
+.atlas-main{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:40px 48px 60px}
+.section-marker{display:flex;align-items:baseline;gap:16px;margin:0 0 24px;padding-bottom:14px;border-bottom:2px solid var(--ink)}
+.section-num{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);letter-spacing:1px}
+.section-title{font-family:var(--serif);font-size:30px;font-weight:700;letter-spacing:-1px;color:var(--ink);line-height:1}
+.section-dek{font-family:var(--read);font-style:italic;font-size:15px;color:var(--ink-3);margin-left:auto}
+
+/* LEDE — the opening summary paragraph */
+.lede{font-family:var(--read);font-size:21px;line-height:1.5;color:var(--ink-2);margin-bottom:36px;max-width:920px}
+.lede .drop{float:left;font-family:var(--serif);font-size:76px;font-weight:900;line-height:0.7;margin:8px 12px 0 0;color:var(--accent);font-variation-settings:'opsz' 144}
+.lede b{color:var(--ink);font-weight:600}
+.lede .hot{color:var(--accent);font-weight:600}
+
+/* GRID */
+.row{display:grid;gap:1px;background:var(--rule);border:1px solid var(--rule);margin-bottom:36px}
+.row.cols-4{grid-template-columns:repeat(4,1fr)}
+.row.cols-3{grid-template-columns:repeat(3,1fr)}
+.row.cols-2{grid-template-columns:1fr 1fr}
+.grid-plain{display:grid;gap:28px;margin-bottom:36px}
+.gp-2{grid-template-columns:1.4fr 1fr}
+.gp-2e{grid-template-columns:1fr 1fr}
+.gp-3{grid-template-columns:repeat(3,1fr)}
+.gp-1{grid-template-columns:1fr}
+
+/* STAT — newspaper number block */
+.stat{background:var(--card);padding:22px 24px;cursor:pointer;transition:background 0.2s;position:relative}
+.stat:hover{background:var(--paper-2)}
+.stat-label{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px}
+.stat-num{font-family:var(--serif);font-size:42px;font-weight:700;letter-spacing:-2px;color:var(--ink);line-height:0.95;font-variation-settings:'opsz' 144}
+.stat-unit{font-size:18px;color:var(--ink-3);font-weight:400}
+.stat-foot{font-family:var(--read);font-size:13px;color:var(--ink-3);margin-top:10px;font-style:italic}
+.stat-delta{font-family:var(--mono);font-size:11px;font-weight:600;padding:1px 0;margin-right:6px;font-style:normal}
+.stat-delta.up{color:var(--green)}.stat-delta.dn{color:var(--red)}.stat-delta.nt{color:var(--ink-3)}
+
+/* ARTICLE CARD */
+.art{background:var(--card);border:1px solid var(--rule);padding:26px}
+.art-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--rule)}
+.art-kicker{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent)}
+.art-title{font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:-0.5px;color:var(--ink);margin-top:3px}
+.art-meta{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-3)}
+
+/* FIGURE (chart) */
+.fig{margin:0}
+.fig-cap{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-3);margin-top:12px;padding-top:10px;border-top:1px solid var(--rule);display:flex;justify-content:space-between}
+
+/* DATA TABLE — editorial */
+.dtbl{width:100%;border-collapse:collapse}
+.dtbl th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:0 14px 12px 0;border-bottom:1.5px solid var(--ink)}
+.dtbl th:last-child{text-align:right}
+.dtbl td{font-family:var(--read);font-size:15px;color:var(--ink-2);padding:13px 14px 13px 0;border-bottom:1px solid var(--rule)}
+.dtbl td:last-child{text-align:right}
+.dtbl tr:last-child td{border-bottom:none}
+.dtbl tbody tr{cursor:pointer;transition:background 0.15s}
+.dtbl tbody tr:hover{background:var(--paper-2)}
+.dtbl .name{font-family:var(--serif);font-weight:600;color:var(--ink);font-size:16px}
+.dtbl .mono{font-family:var(--mono);font-size:13px}
+.flag{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;padding:3px 9px;display:inline-block}
+.f-green{background:var(--green-soft);color:var(--green)}.f-amber{background:var(--amber-soft);color:var(--amber)}.f-red{background:var(--red-soft);color:var(--red)}.f-blue{background:var(--blue-soft);color:var(--blue)}.f-grey{background:var(--paper-2);color:var(--ink-3)}
+
+/* TARGET BAR — thin editorial */
+.tbar{margin-bottom:16px}
+.tbar-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.tbar-l{font-family:var(--read);font-size:15px;color:var(--ink-2)}
+.tbar-v{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink)}
+.tbar-track{height:6px;background:var(--paper-2);position:relative}
+.tbar-fill{height:100%;transition:width 1.2s cubic-bezier(0.4,0,0.2,1)}
+.tbar-target{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink)}
+
+/* PULL QUOTE / ATTENTION */
+.attn-block{background:var(--card);border:1px solid var(--rule);border-top:3px solid var(--accent);padding:26px}
+.attn-item{display:flex;gap:16px;padding:15px 0;border-bottom:1px solid var(--rule);cursor:pointer;transition:padding 0.2s}
+.attn-item:last-child{border-bottom:none}
+.attn-item:hover{padding-left:6px}
+.attn-rank{font-family:var(--serif);font-size:28px;font-weight:700;color:var(--ink-4);line-height:1;flex-shrink:0;width:36px;font-variation-settings:'opsz' 144}
+.attn-body{flex:1}
+.attn-sev{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-bottom:3px}
+.attn-sev.red{color:var(--red)}.attn-sev.amber{color:var(--amber)}
+.attn-t{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink);line-height:1.2}
+.attn-s{font-family:var(--read);font-size:14px;color:var(--ink-3);font-style:italic;margin-top:2px}
+
+/* DONUT */
+.donut-row{display:flex;align-items:center;gap:26px}
+.donut-c{position:relative;flex-shrink:0}
+.donut-mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-mid .b{font-family:var(--serif);font-size:30px;font-weight:700;letter-spacing:-1px;color:var(--ink);font-variation-settings:'opsz' 144}
+.donut-mid .s{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-3)}
+.legend{flex:1}
+.leg{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--rule)}
+.leg:last-child{border-bottom:none}
+.leg-d{width:10px;height:10px;flex-shrink:0}
+.leg-l{font-family:var(--read);font-size:15px;color:var(--ink-2)}
+.leg-v{margin-left:auto;font-family:var(--mono);font-size:14px;font-weight:600;color:var(--ink)}
+.leg-pct{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-left:8px}
+
+/* LIST */
+.lst{display:flex;flex-direction:column}
+.lrow{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--rule);cursor:pointer;transition:padding 0.2s}
+.lrow:last-child{border-bottom:none}
+.lrow:hover{padding-left:5px}
+.lrow-mono{font-family:var(--mono);font-size:11px;color:var(--ink-4);width:24px;flex-shrink:0}
+.lrow-m{flex:1;min-width:0}
+.lrow-t{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink)}
+.lrow-s{font-family:var(--read);font-size:13px;color:var(--ink-3);font-style:italic;margin-top:1px}
+.lrow-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+/* SYS LINES */
+.sys{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--rule)}
+.sys:last-child{border-bottom:none}
+.sys-l{display:flex;align-items:center;gap:11px;font-family:var(--read);font-size:15px;color:var(--ink-2)}
+.sys-l .d{width:8px;height:8px;border-radius:50%}
+.sys-v{font-family:var(--mono);font-size:12px;font-weight:600}
+
+/* ANNOUNCEMENTS */
+.note{padding:16px 0;border-bottom:1px solid var(--rule)}
+.note:last-child{border-bottom:none}
+.note-t{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.note-b{font-family:var(--read);font-size:14px;color:var(--ink-2);line-height:1.5}
+.note-m{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-4);margin-top:8px}
+
+/* PIPELINE editorial */
+.pipe{display:flex;border:1px solid var(--rule)}
+.pipe-s{flex:1;text-align:center;padding:18px 8px;border-right:1px solid var(--rule)}
+.pipe-s:last-child{border-right:none}
+.pipe-v{font-family:var(--serif);font-size:30px;font-weight:700;letter-spacing:-1px;color:var(--ink);font-variation-settings:'opsz' 144}
+.pipe-l{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-3);margin-top:5px}
+
+/* MINI */
+.minis{display:flex;border:1px solid var(--rule);margin-top:18px}
+.mini{flex:1;text-align:center;padding:16px;border-right:1px solid var(--rule)}
+.mini:last-child{border-right:none}
+.mini-v{font-family:var(--serif);font-size:26px;font-weight:700;letter-spacing:-1px;font-variation-settings:'opsz' 144}
+.mini-l{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-3);margin-top:4px}
+
+/* DRAWER */
+#scrim{position:fixed;inset:0;background:rgba(28,26,23,0.4);z-index:8999;opacity:0;pointer-events:none;transition:opacity 0.3s}
+#scrim.on{opacity:1;pointer-events:all}
+#drawer{position:fixed;top:0;right:-560px;width:560px;max-width:94vw;height:100vh;background:var(--card);border-left:1px solid var(--ink);z-index:9000;transition:right 0.4s cubic-bezier(0.4,0,0.2,1);overflow-y:auto;box-shadow:-16px 0 50px rgba(28,26,23,0.15)}
+#drawer.open{right:0}
+.dw-h{padding:30px 36px 22px;border-bottom:2px solid var(--ink);position:sticky;top:0;background:var(--card);z-index:1;display:flex;align-items:flex-start;justify-content:space-between}
+.dw-kicker{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:5px}
+.dw-t{font-family:var(--serif);font-size:26px;font-weight:700;letter-spacing:-1px;color:var(--ink);line-height:1;font-variation-settings:'opsz' 144}
+.dw-x{width:36px;height:36px;border:1px solid var(--rule);background:transparent;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0}
+.dw-x:hover{border-color:var(--accent);color:var(--accent)}
+.dw-x svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8}
+.dw-b{padding:28px 36px 50px}
+.dw-sec{margin-bottom:28px}
+.dw-sl{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--rule)}
+.dw-st{display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--rule)}
+.dw-st:last-child{border-bottom:none}
+.dw-st-l{font-family:var(--read);font-size:15px;color:var(--ink-2)}
+.dw-st-v{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--ink)}
+.dw-st-v.g{color:var(--green)}.dw-st-v.a{color:var(--amber)}.dw-st-v.r{color:var(--red)}.dw-st-v.b{color:var(--blue)}
+.dw-note{padding:16px 18px;font-family:var(--read);font-size:15px;line-height:1.6;font-style:italic;border-left:3px solid}
+.dw-note.r{background:var(--red-soft);border-color:var(--red);color:var(--accent-2)}
+.dw-note.a{background:var(--amber-soft);border-color:var(--amber);color:#7a5214}
+.dw-item{padding:14px 0;border-bottom:1px solid var(--rule)}
+.dw-item:last-child{border-bottom:none}
+.dw-item-t{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink)}
+.dw-item-m{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:4px;display:flex;gap:10px}
+
+/* AI */
+#aifab{position:fixed;bottom:30px;right:30px;z-index:7000;width:58px;height:58px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(154,59,46,0.35);transition:all 0.3s}
+#aifab:hover{transform:scale(1.07) translateY(-2px);background:var(--accent-2)}
+#aifab svg{width:25px;height:25px;stroke:var(--paper);fill:none;stroke-width:1.7}
+#ai-panel{position:fixed;bottom:100px;right:30px;z-index:7000;width:420px;max-width:92vw;height:580px;max-height:78vh;background:var(--card);border:1px solid var(--ink);box-shadow:0 20px 60px rgba(28,26,23,0.25);display:flex;flex-direction:column;opacity:0;transform:translateY(16px) scale(0.97);pointer-events:none;transition:all 0.32s cubic-bezier(0.4,0,0.2,1);overflow:hidden}
+#ai-panel.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all}
+.aih{padding:20px 22px;border-bottom:2px solid var(--ink);display:flex;align-items:center;justify-content:space-between}
+.aih-l{display:flex;align-items:center;gap:12px}
+.aih-orb{width:38px;height:38px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center}
+.aih-orb svg{width:19px;height:19px;stroke:var(--paper);fill:none;stroke-width:1.7}
+.aih h4{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-0.3px}
+.aih .st{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--green);display:flex;align-items:center;gap:5px;margin-top:2px}
+.aih .st .d{width:5px;height:5px;border-radius:50%;background:var(--green)}
+.aix{width:30px;height:30px;border:1px solid var(--rule);background:transparent;color:var(--ink-3);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.aix:hover{border-color:var(--accent);color:var(--accent)}
+.aix svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+.aib{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;background:var(--paper)}
+.am{display:flex;gap:10px;max-width:90%}
+.am.user{align-self:flex-end;flex-direction:row-reverse}
+.am-av{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.am.bot .am-av{background:var(--accent)}
+.am.bot .am-av svg{width:15px;height:15px;stroke:var(--paper);fill:none;stroke-width:1.7}
+.am.user .am-av{background:var(--card);border:1px solid var(--rule);font-family:var(--mono);font-size:11px;font-weight:600;color:var(--ink-3)}
+.ab{padding:13px 16px;font-family:var(--read);font-size:14px;line-height:1.6}
+.am.bot .ab{background:var(--card);border:1px solid var(--rule);color:var(--ink)}
+.am.user .ab{background:var(--accent);color:var(--paper)}
+.ab b{font-weight:600;color:var(--accent)}
+.am.user .ab b{color:var(--paper)}
+.ab .metric{display:inline-flex;font-family:var(--mono);font-size:13px;font-weight:600;padding:1px 7px;background:var(--accent-soft);color:var(--accent-2);font-style:normal}
+.ab ul{margin:8px 0 2px;padding-left:2px;list-style:none}
+.ab li{padding:4px 0;display:flex;gap:8px;font-size:13.5px}
+.asug{padding:14px 18px;border-top:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:7px;background:var(--card)}
+.achip{font-family:var(--read);font-size:13px;color:var(--ink-2);background:var(--paper);border:1px solid var(--rule);padding:7px 13px;cursor:pointer;transition:all 0.2s}
+.achip:hover{border-color:var(--accent);color:var(--accent)}
+.ainp{padding:14px 16px;border-top:1px solid var(--rule);display:flex;gap:9px;background:var(--card)}
+.ainp input{flex:1;font-family:var(--read);font-size:14px;color:var(--ink);background:var(--paper);border:1px solid var(--rule);padding:11px 14px;outline:none;transition:all 0.2s}
+.ainp input:focus{border-color:var(--accent)}
+.aisend{width:44px;height:44px;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s}
+.aisend:hover{background:var(--accent-2)}
+.aisend svg{width:18px;height:18px;stroke:var(--paper);fill:none;stroke-width:2}
+.atyping{display:flex;gap:4px;padding:4px 0}
+.atyping span{width:7px;height:7px;border-radius:50%;background:var(--ink-4);animation:typ 1.4s infinite}
+.atyping span:nth-child(2){animation-delay:0.2s}.atyping span:nth-child(3){animation-delay:0.4s}
+@keyframes typ{0%,60%,100%{opacity:0.3}30%{opacity:1}}
+
+.colophon{position:relative;z-index:1;border-top:3px double var(--ink);padding:24px 48px;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-4);max-width:1240px;margin:0 auto}
+.colophon b{color:var(--accent);font-weight:600}
+@media(max-width:1000px){.row.cols-4,.row.cols-3{grid-template-columns:repeat(2,1fr)}.gp-2,.gp-2e,.gp-3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<!-- LANDING -->
+<div id="landing">
+  <div class="l-rule"></div>
+  <div class="l-kicker">Executive Briefing</div>
+  <div class="l-logo">Atlas</div>
+  <div class="l-sub">The state of the business, told plainly.</div>
+  <div class="l-meta">Offline · Confidential · For Leadership</div>
+  <div class="dz" id="dz">
+    <div class="dz-ic"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></div>
+    <div class="dz-h">Load the data file to publish</div>
+    <div class="dz-p">Drag <b>NEXUS_DATA_TEMPLATE.xlsx</b> here, or browse.<br>Everything stays on this device.</div>
+    <button class="btn" onclick="document.getElementById('fi').click()">Browse files</button>
+    <input type="file" id="fi" accept=".xlsx,.xls" onchange="onFile(this)">
+  </div>
+  <button class="btn-ghost" onclick="loadDemo()">Read a sample edition</button>
+  <div class="l-err" id="derr"></div>
+  <div class="l-credit">Edited &amp; produced by <b>sxxiif</b> · © 2025</div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+<div class="masthead">
+  <div class="mast-top">
+    <div class="mast-edition"><span id="edition-date">—</span><span>Vol. I</span><span>Executive Edition</span></div>
+    <div>Confidential — For Leadership Only</div>
+  </div>
+  <div class="mast-main">
+    <div class="mast-title">The Atlas Briefing<small>A clear account of where the business stands</small></div>
+    <div class="mast-right"><div class="mast-clock" id="clock">—</div><div class="mast-status"><span class="dot"></span>Data Live</div></div>
+  </div>
+</div>
+<nav class="atlas-nav">
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-view="briefing" onclick="go('briefing',this)">The Briefing</button>
+    <button class="nav-tab" data-view="finance" onclick="go('finance',this)">Finance</button>
+    <button class="nav-tab" data-view="people" onclick="go('people',this)">People</button>
+    <button class="nav-tab" data-view="operations" onclick="go('operations',this)">Operations</button>
+    <button class="nav-tab" data-view="talent" onclick="go('talent',this)">Talent</button>
+    <button class="nav-tab" data-view="revenue" id="rev-tab" onclick="go('revenue',this)" style="display:none">Revenue</button>
+  </div>
+  <div class="nav-right">
+    <div class="nav-period"><button onclick="setP(this)">Wk</button><button class="active" onclick="setP(this)">Mo</button><button onclick="setP(this)">Qtr</button></div>
+    <button class="nav-reload" onclick="reloadData()"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-2.64-6.36M21 3v6h-6"/></svg>Reload</button>
+  </div>
+</nav>
+<main class="atlas-main" id="content"></main>
+<div class="colophon"><div>The Atlas Briefing · <span id="ts">—</span></div><div>Edited &amp; produced by <b>sxxiif</b> · © 2025</div></div>
+</div>
+
+<!-- DRAWER -->
+<div id="scrim" onclick="closeDrawer()"></div>
+<div id="drawer"><div class="dw-h"><div><div class="dw-kicker" id="dwk">Detail</div><div class="dw-t" id="dwt">—</div></div><button class="dw-x" onclick="closeDrawer()"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div><div class="dw-b" id="dwb"></div></div>
+
+<!-- AI -->
+<button id="aifab" onclick="toggleAI()" style="display:none"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 015 5v1a5 5 0 01-5 5 5 5 0 01-5-5V7a5 5 0 015-5z"/><path d="M12 13v3m-4 5h8a2 2 0 002-2 5 5 0 00-5-5h-2a5 5 0 00-5 5 2 2 0 002 2z"/></svg></button>
+<div id="ai-panel"><div class="aih"><div class="aih-l"><div class="aih-orb"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 015 5v1a5 5 0 01-5 5 5 5 0 01-5-5V7a5 5 0 015-5z"/><path d="M12 13v3m-4 5h8a2 2 0 002-2 5 5 0 00-5-5h-2a5 5 0 00-5 5 2 2 0 002 2z"/></svg></div><div><h4>The Desk</h4><div class="st"><span class="d"></span>Offline · reads your data</div></div></div><button class="aix" onclick="toggleAI()"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div><div class="aib" id="ai-body"></div><div class="asug" id="ai-suggest"></div><div class="ainp"><input id="ai-input" placeholder="Ask about the numbers…" onkeydown="if(event.key==='Enter')aiSend()"><button class="aisend" onclick="aiSend()"><svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button></div></div>
+<script>
+const CONFIG={
+
+  // ── COMPANY NAME (shown top-left and on landing screen) ──
+  companyName:"NEXUS",          // e.g. "ACME CORP"
+  companyDot:".",               // small accent after the name (or "")
+  tagline:"Executive Intelligence Platform",
+  subtitle:"Everything your leadership needs, in one view.",
+
+  // ── YOUR LOGO ──
+  // OPTION A: leave logoImage empty ("") to use the text name above.
+  // OPTION B: paste your logo as a Base64 data-URL (see the guide).
+  //   Example: logoImage:"data:image/png;base64,iVBORw0KGggoAAA...",
+  logoImage:"",
+  logoHeight:34,                // logo height in pixels
+
+  // ── CREDIT (your name — keep or change) ──
+  builtBy:"sxxiif",
+
+  // ── COLOR THEME ──
+  // Pick your main accent color (used for highlights, buttons, charts).
+  accent:"#5b9dff",             // try: "#00d4ff" cyan, "#34e0a1" green, "#9d7bff" violet, "#f5c451" gold
+  accent2:"#3d7fe6",            // a slightly darker shade of your accent
+
+  // Background darkness (the base color of the whole dashboard).
+  background:"#070a12",         // try "#0a0e1a" or "#000000" for pure black
+
+  // Secondary accent (used in gradients, the AI orb, logos).
+  accentSecondary:"#9d7bff"     // violet by default
+};
+// ════ DEMO DATA ════
+const DEMO={
+  finance:{budgetTotal:4000000,budgetSpent:2720000,currency:"AED",period:"Q2 2025",forecastDate:"SEP 12, 2025",
+    deptBudgets:[{name:"Operations",pct:82},{name:"IT & Systems",pct:55},{name:"HR & Talent",pct:61},{name:"Projects",pct:70},{name:"Procurement",pct:45}],
+    monthlySpend:[{month:"JAN",val:310},{month:"FEB",val:380},{month:"MAR",val:420},{month:"APR",val:460},{month:"MAY",val:510},{month:"JUN",val:640}]},
+  workforce:{total:142,onSite:89,remote:31,onMission:8,sickLeave:5,annualLeave:7,other:2,newHires:3,departures:1,avgHrs:42.3,attrition:2.1,attendance:86,
+    history:[{month:"JAN",val:128},{month:"FEB",val:131},{month:"MAR",val:135},{month:"APR",val:138},{month:"MAY",val:139},{month:"JUN",val:142}]},
+  missions:[
+    {initials:"MA",name:"Mohammed Al-Mansoori",destination:"Dubai",purpose:"Client Site Visit",from:"JUN 03",to:"JUN 08",status:"ACTIVE"},
+    {initials:"SH",name:"Sara Hassan",destination:"Riyadh",purpose:"Partnership Summit",from:"JUN 05",to:"JUN 09",status:"ACTIVE"},
+    {initials:"KR",name:"Khalid Rashid",destination:"London",purpose:"Tech Conference",from:"JUN 04",to:"JUN 12",status:"TRAVEL"},
+    {initials:"LM",name:"Layla Mahmoud",destination:"Cairo",purpose:"Field Audit",from:"JUN 06",to:"JUN 10",status:"ACTIVE"},
+    {initials:"FA",name:"Fatima Alawi",destination:"Abu Dhabi",purpose:"Training",from:"JUN 05",to:"JUN 07",status:"RETURN"},
+    {initials:"AR",name:"Ahmed Rashidi",destination:"Singapore",purpose:"Trade Expo",from:"JUN 01",to:"JUN 09",status:"OVERDUE"}],
+  tasks:{completed:148,inProgress:36,blocked:16,overdue:9,total:200,
+    list:[{name:"Q2 Financial Report — Final Draft",dept:"Finance",status:"DONE",date:"JUN 04"},
+      {name:"IT Security Audit — Phase 2",dept:"IT",status:"ACTIVE",date:"DUE JUN 15"},
+      {name:"Vendor Contract Renewal — 3 contracts",dept:"Procurement",status:"BLOCKED",date:"Awaiting legal"},
+      {name:"Onboarding — 3 new joiners",dept:"HR",status:"OVERDUE",date:"Started JUN 01"},
+      {name:"Project Omega — Phase 2 Kickoff",dept:"Projects",status:"ACTIVE",date:"DUE JUN 15"},
+      {name:"Office Infrastructure Upgrade",dept:"Facilities",status:"DONE",date:"MAY 30"}]},
+  departments:[
+    {name:"Operations",staff:34,tasksPct:80,budgetPct:72,rag:"GREEN",utilization:92},
+    {name:"IT & Systems",staff:22,tasksPct:90,budgetPct:55,rag:"GREEN",utilization:78},
+    {name:"Finance",staff:18,tasksPct:95,budgetPct:68,rag:"GREEN",utilization:65},
+    {name:"Human Resources",staff:14,tasksPct:58,budgetPct:61,rag:"AMBER",utilization:70},
+    {name:"Projects",staff:28,tasksPct:74,budgetPct:70,rag:"GREEN",utilization:85},
+    {name:"Procurement",staff:16,tasksPct:65,budgetPct:58,rag:"GREEN",utilization:45}],
+  decisions:[
+    {type:"Purchase Order",title:"Server hardware upgrade — AED 180K",owner:"IT Dept",days:5,priority:"URGENT"},
+    {type:"Leave Request",title:"3 leave requests — Operations team",owner:"Operations",days:4,priority:"URGENT"},
+    {type:"Contract",title:"Vendor renewal — Facilities Mgmt",owner:"Procurement",days:2,priority:"MEDIUM"},
+    {type:"Budget Request",title:"Q3 training budget top-up — HR",owner:"HR",days:2,priority:"MEDIUM"},
+    {type:"Policy Update",title:"Remote work policy v2 sign-off",owner:"HR / Legal",days:1,priority:"INFO"}],
+  risks:[
+    {score:9,title:"Single ERP vendor dependency",owner:"IT",mitigation:"Contract review in progress",likelihood:8,impact:9,level:"HIGH"},
+    {score:6,title:"2 critical roles unfilled",owner:"HR",mitigation:"Recruitment accelerated",likelihood:5,impact:6,level:"MEDIUM"},
+    {score:5,title:"Budget overrun risk — Operations",owner:"Finance",mitigation:"Monthly review added",likelihood:6,impact:5,level:"MEDIUM"}],
+  hiring:{openRoles:11,pipeline:[{stage:"Applied",count:38},{stage:"Screening",count:14},{stage:"Interview",count:7},{stage:"Offer",count:3},{stage:"Accepted",count:2}],
+    avgDays:24,offersPending:3,conversionPct:67,
+    deptRoles:[{dept:"Operations",count:3},{dept:"IT",count:2},{dept:"Finance",count:1},{dept:"Projects",count:3},{dept:"HR",count:2}]},
+  it:[{name:"Core Network Uptime",value:"99.97%",status:"ok"},{name:"Email / Collaboration",value:"Operational",status:"ok"},
+    {name:"ERP System",value:"Operational",status:"ok"},{name:"Open IT Tickets",value:"14",status:"wn"},
+    {name:"Critical Alerts",value:"0",status:"ok"},{name:"Last Backup",value:"Today 03:00",status:"ok"},
+    {name:"Cybersecurity",value:"Secured",status:"ok"}],
+  announcements:[
+    {title:"Town Hall — Q2 Results",body:"CEO & CFO present Q2 results and H2 roadmap. Mandatory for all department heads.",date:"JUN 12 · 10:00 · Main Hall",by:"HR",type:"INFO"},
+    {title:"System Maintenance Window",body:"ERP and email offline for scheduled upgrades. Save work before the window begins.",date:"JUN 08 · 23:00–02:00",by:"IT",type:"WARNING"},
+    {title:"ISO 9001 Certification Renewed",body:"Congratulations to Operations and Quality teams. Certificate valid through June 2027.",date:"JUN 03",by:"Operations",type:"SUCCESS"}],
+  events:[
+    {day:"08",month:"JUN",title:"Payroll Processing",dept:"Finance",type:"PAYROLL"},
+    {day:"12",month:"JUN",title:"Q2 Town Hall — All Hands",dept:"All Depts",type:"MEETING"},
+    {day:"15",month:"JUN",title:"Project Omega — Phase 2 Deadline",dept:"Projects",type:"DEADLINE"},
+    {day:"16",month:"JUN",title:"New Joiners Onboarding",dept:"HR",type:"MEETING"},
+    {day:"16",month:"JUN",title:"Eid Al-Adha — Public Holiday",dept:"All",type:"HOLIDAY"},
+    {day:"22",month:"JUN",title:"Mid-Year Performance Reviews",dept:"HR",type:"REVIEW"}],
+  // ── OPTIONAL: Revenue / Customers (set enabled:false to hide everywhere) ──
+  revenue:{enabled:true,currency:"AED",mrr:1240000,mrrTarget:1300000,arr:14880000,
+    newClients:14,churnedClients:3,totalClients:218,nps:62,
+    pipeline:8600000,wonThisMonth:1850000,
+    trend:[{month:"JAN",val:980},{month:"FEB",val:1030},{month:"MAR",val:1095},{month:"APR",val:1140},{month:"MAY",val:1190},{month:"JUN",val:1240}],
+    topClients:[{name:"Gulf Holdings",value:280000,status:"GROWING"},{name:"Emirates Tech",value:215000,status:"STABLE"},{name:"Falcon Group",value:190000,status:"GROWING"},{name:"Desert Logistics",value:145000,status:"AT RISK"},{name:"Pearl Industries",value:120000,status:"STABLE"}]}
+};
+let D=null,charts={};
+// ════ FILE HANDLING ════
+function onFile(inp){const f=inp.files[0];if(f)readFile(f);}
+const dz=document.getElementById('dz');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');const f=e.dataTransfer.files[0];if(f)readFile(f)});
+function readFile(f){
+  if(!f.name.match(/\.xlsx?$/i)){err('Please drop an Excel (.xlsx) file');return;}
+  err('');
+  const r=new FileReader();
+  r.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'binary'});D=parseWB(wb);launch();}catch(ex){err('Could not read file — make sure it is the NEXUS template');console.error(ex);}};
+  r.readAsBinaryString(f);
+}
+function err(m){document.getElementById('derr').textContent=m;}
+function loadDemo(){D=JSON.parse(JSON.stringify(DEMO));launch();}
+function reloadData(){D=null;Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};document.getElementById('app').style.display='none';document.getElementById('aifab').style.display='none';document.getElementById('landing').classList.remove('hidden');}
+function parseWB(wb){
+  const d=JSON.parse(JSON.stringify(DEMO));
+  const rows=n=>{const ws=wb.Sheets[n];return ws?XLSX.utils.sheet_to_json(ws,{header:1,defval:''}):[];};
+  const num=v=>{const n=Number(String(v).replace(/[^0-9.-]/g,''));return isNaN(n)?0:n;};
+  try{const f=rows('💰 Finance');if(f.length>7){
+    d.finance.budgetTotal=num(f[3][1])||d.finance.budgetTotal;
+    d.finance.budgetSpent=num(f[4][1])||d.finance.budgetSpent;
+    d.finance.period=f[5][1]||d.finance.period;d.finance.currency=f[6][1]||d.finance.currency;
+    d.finance.forecastDate=f[7][1]||d.finance.forecastDate;
+    const db=[];for(let i=11;i<=18;i++)if(f[i]&&f[i][0])db.push({name:String(f[i][0]),pct:num(f[i][1])});
+    if(db.length)d.finance.deptBudgets=db;
+    const ms=[];for(let i=23;i<=28;i++)if(f[i]&&f[i][0])ms.push({month:String(f[i][2]||f[i][0]).substring(0,3).toUpperCase(),val:num(f[i][1])});
+    if(ms.length)d.finance.monthlySpend=ms;}}catch(e){}
+  try{const w=rows('👥 Workforce');if(w.length>7){
+    const m={3:'total',4:'onSite',5:'remote',6:'onMission',7:'sickLeave',8:'annualLeave',9:'other'};
+    for(const[r,k]of Object.entries(m))if(w[r]&&w[r][1]!=='')d.workforce[k]=num(w[r][1]);
+    const mm={13:'newHires',14:'departures',15:'avgHrs',16:'attrition',17:'attendance'};
+    for(const[r,k]of Object.entries(mm))if(w[r]&&w[r][1]!=='')d.workforce[k]=num(w[r][1]);
+    const h=[];for(let i=22;i<=27;i++)if(w[i]&&w[i][0])h.push({month:String(w[i][0]).substring(0,3).toUpperCase(),val:num(w[i][1])});
+    if(h.length)d.workforce.history=h;}}catch(e){}
+  try{const m=rows('✈️ Missions');if(m.length>5){const a=[];
+    for(let i=4;i<m.length;i++){if(!m[i][0])continue;a.push({name:String(m[i][0]),initials:String(m[i][1]||'').substring(0,2).toUpperCase()||'··',destination:String(m[i][2]),purpose:String(m[i][3]),from:String(m[i][4]),to:String(m[i][5]),status:String(m[i][6]).toUpperCase()});}
+    if(a.length)d.missions=a;}}catch(e){}
+  try{const t=rows('✅ Tasks');if(t.length>5){
+    d.tasks.completed=num(t[3][1]);d.tasks.inProgress=num(t[4][1]);d.tasks.blocked=num(t[5][1]);d.tasks.overdue=num(t[6][1]);d.tasks.total=num(t[7][1]);
+    const l=[];for(let i=13;i<t.length;i++){if(!t[i][0])continue;l.push({name:String(t[i][0]),dept:String(t[i][1]),status:String(t[i][2]).toUpperCase(),date:String(t[i][3])});}
+    if(l.length)d.tasks.list=l;}}catch(e){}
+  try{const dp=rows('🏢 Departments');if(dp.length>5){const a=[];
+    for(let i=4;i<dp.length;i++){if(!dp[i][0])continue;a.push({name:String(dp[i][0]),staff:num(dp[i][1]),tasksPct:num(dp[i][2]),budgetPct:num(dp[i][3]),utilization:num(dp[i][4]),rag:String(dp[i][5]).toUpperCase()});}
+    if(a.length)d.departments=a;}}catch(e){}
+  try{const dc=rows('⚡ Decisions');if(dc.length>5){const a=[];
+    for(let i=4;i<dc.length;i++){if(!dc[i][0])continue;a.push({type:String(dc[i][0]),title:String(dc[i][1]),owner:String(dc[i][2]),days:num(dc[i][3]),priority:String(dc[i][4]).toUpperCase()});}
+    if(a.length)d.decisions=a;}}catch(e){}
+  try{const rk=rows('⚠️ Risks');if(rk.length>5){const a=[];
+    for(let i=4;i<rk.length;i++){if(!rk[i][0])continue;const lk=num(rk[i][3]),im=num(rk[i][4]);a.push({title:String(rk[i][0]),owner:String(rk[i][1]),mitigation:String(rk[i][2]),likelihood:lk,impact:im,level:String(rk[i][5]).toUpperCase(),score:Math.round(lk*im/10)});}
+    if(a.length)d.risks=a;}}catch(e){}
+  try{const h=rows('🎯 Hiring');if(h.length>5){const p=[];
+    for(let i=4;i<=8;i++)if(h[i]&&h[i][0])p.push({stage:String(h[i][0]),count:num(h[i][1])});
+    if(p.length)d.hiring.pipeline=p;
+    if(h[12])d.hiring.openRoles=num(h[12][1]);if(h[13])d.hiring.avgDays=num(h[13][1]);
+    if(h[14])d.hiring.offersPending=num(h[14][1]);if(h[15])d.hiring.conversionPct=num(h[15][1]);
+    const dr=[];for(let i=20;i<h.length;i++)if(h[i]&&h[i][0])dr.push({dept:String(h[i][0]),count:num(h[i][1])});
+    if(dr.length)d.hiring.deptRoles=dr;}}catch(e){}
+  try{const it=rows('🖥️ IT Health');if(it.length>5){const a=[];
+    for(let i=4;i<it.length;i++){if(!it[i][0])continue;const v=String(it[i][1]);const s=(v==='Operational'||v==='Secured'||v==='0'||parseFloat(v)>99)?'ok':(v==='Degraded')?'wn':(v==='Down')?'cr':'ok';a.push({name:String(it[i][0]),value:v,status:s});}
+    if(a.length)d.it=a;}}catch(e){}
+  try{const an=rows('📢 Announcements');if(an.length>7){const aa=[];
+    for(let i=6;i<=10;i++)if(an[i]&&an[i][0])aa.push({title:String(an[i][0]),body:String(an[i][1]),date:String(an[i][2]),by:String(an[i][3]),type:String(an[i][4]).toUpperCase()});
+    if(aa.length)d.announcements=aa;
+    const ev=[];for(let i=15;i<an.length;i++)if(an[i]&&an[i][0])ev.push({title:String(an[i][0]),dept:String(an[i][1]),day:String(an[i][2]),month:String(an[i][3]),type:String(an[i][4]).toUpperCase()});
+    if(ev.length)d.events=ev;}}catch(e){}
+  try{const rv=rows('💵 Revenue');if(rv.length>14&&d.revenue){
+    const en=String(rv[3][1]).toUpperCase();
+    d.revenue.enabled=(en==='YES'||en==='TRUE'||en==='1');
+    d.revenue.currency=rv[4][1]||d.revenue.currency;
+    d.revenue.mrr=num(rv[5][1])||d.revenue.mrr;
+    d.revenue.mrrTarget=num(rv[6][1])||d.revenue.mrrTarget;
+    d.revenue.arr=num(rv[7][1])||d.revenue.arr;
+    d.revenue.totalClients=num(rv[8][1])||d.revenue.totalClients;
+    d.revenue.newClients=num(rv[9][1])||d.revenue.newClients;
+    d.revenue.churnedClients=num(rv[10][1])||d.revenue.churnedClients;
+    d.revenue.nps=num(rv[11][1])||d.revenue.nps;
+    d.revenue.pipeline=num(rv[12][1])||d.revenue.pipeline;
+    d.revenue.wonThisMonth=num(rv[13][1])||d.revenue.wonThisMonth;
+    const tr=[];for(let i=17;i<=22;i++)if(rv[i]&&rv[i][0])tr.push({month:String(rv[i][2]||rv[i][0]).substring(0,3).toUpperCase(),val:num(rv[i][1])});
+    if(tr.length)d.revenue.trend=tr;
+    const cl=[];for(let i=27;i<rv.length;i++)if(rv[i]&&rv[i][0])cl.push({name:String(rv[i][0]),value:num(rv[i][1]),status:String(rv[i][2]).toUpperCase()});
+    if(cl.length)d.revenue.topClients=cl;
+  }}catch(e){}
+  return d;
+}
+// ════ HELPERS ════
+function fmt(n){return Number(n).toLocaleString('en-US');}
+function fmtK(n){return n>=1000000?(n/1000000).toFixed(2)+'M':n>=1000?(n/1000).toFixed(0)+'K':n;}
+function pct(a,b){return b?Math.round(a/b*100):0;}
+let currentView='briefing';
+const VIEWS={briefing:'The Briefing',finance:'Finance',people:'People',operations:'Operations',talent:'Talent',revenue:'Revenue'};
+
+function applyConfig(){
+  document.querySelectorAll('.l-credit b,.colophon b').forEach(e=>e.textContent=CONFIG.builtBy);
+  document.title=(CONFIG.companyName&&CONFIG.companyName!=='NEXUS'?CONFIG.companyName+' ':'')+'Atlas — Executive Briefing';
+}
+function launch(){
+  applyConfig();
+  document.getElementById('landing').classList.add('hidden');
+  document.getElementById('app').style.display='block';
+  document.getElementById('aifab').style.display='flex';
+  const now=new Date();
+  document.getElementById('edition-date').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('ts').textContent='Published '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  if(D.revenue&&D.revenue.enabled)document.getElementById('rev-tab').style.display='';
+  render();startClock();initAI();
+}
+function startClock(){function t(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});}t();setInterval(t,30000);}
+function setP(b){document.querySelectorAll('.nav-period button').forEach(x=>x.classList.remove('active'));b.classList.add('active');}
+function go(view,btn){
+  currentView=view;
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');else document.querySelector(`.nav-tab[data-view="${view}"]`)?.classList.add('active');
+  Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};
+  render();window.scrollTo({top:0,behavior:'smooth'});
+}
+function sclr(s){return{DONE:'var(--green)',ACTIVE:'var(--blue)',BLOCKED:'var(--red)',OVERDUE:'var(--amber)',RETURN:'var(--green)',TRAVEL:'var(--blue)',GROWING:'var(--green)',STABLE:'var(--blue)','AT RISK':'var(--red)'}[s]||'var(--ink-3)';}
+function sflag(s){const m={DONE:'f-green',ACTIVE:'f-blue',BLOCKED:'f-red',OVERDUE:'f-amber',RETURN:'f-green',TRAVEL:'f-grey',GROWING:'f-green',STABLE:'f-blue','AT RISK':'f-red',GREEN:'f-green',AMBER:'f-amber',RED:'f-red',URGENT:'f-red',MEDIUM:'f-amber',INFO:'f-blue',HIGH:'f-red',LOW:'f-green'}[s]||'f-grey';return `<span class="flag ${m}">${s}</span>`;}
+function ragc(r){return r==='GREEN'?'var(--green)':r==='AMBER'?'var(--amber)':'var(--red)';}
+
+// ════ ATTENTION FEED ════
+function buildAttention(){
+  const items=[];
+  D.decisions.filter(d=>d.priority==='URGENT').forEach(d=>items.push({sev:'red',t:d.title,s:'Urgent decision for '+d.owner+', waiting '+d.days+' days',act:()=>openDrawer('decisions')}));
+  D.missions.filter(m=>m.status==='OVERDUE').forEach(m=>items.push({sev:'red',t:m.name+' is overdue from mission',s:m.destination+', expected back '+m.to,act:()=>openDrawer('mission',D.missions.indexOf(m))}));
+  D.risks.filter(r=>r.level==='HIGH').forEach(r=>items.push({sev:'red',t:r.title,s:'High risk, scored '+r.score+' of 10, owned by '+r.owner,act:()=>openDrawer('risk',D.risks.indexOf(r))}));
+  if(D.tasks.blocked>0)items.push({sev:'amber',t:D.tasks.blocked+' tasks are blocked',s:'Execution has stalled and may require escalation',act:()=>openDrawer('tasks')});
+  if(D.tasks.overdue>0)items.push({sev:'amber',t:D.tasks.overdue+' tasks are overdue',s:'These have passed their deadline',act:()=>openDrawer('tasks')});
+  D.departments.filter(d=>d.rag!=='GREEN').forEach(d=>items.push({sev:d.rag==='RED'?'red':'amber',t:d.name+' needs attention',s:'Tasks at '+d.tasksPct+'%, utilization '+d.utilization+'%',act:()=>openDrawer('department',D.departments.indexOf(d))}));
+  D.departments.filter(d=>d.utilization>=90).forEach(d=>items.push({sev:'amber',t:d.name+' is overloaded',s:'Running at '+d.utilization+'% of capacity',act:()=>openDrawer('department',D.departments.indexOf(d))}));
+  items.sort((a,b)=>(a.sev==='red'?0:1)-(b.sev==='red'?0:1));
+  return items;
+}
+window._attn=[];
+
+function render(){
+  const c=document.getElementById('content');
+  if(currentView==='briefing')c.innerHTML=vBriefing();
+  else if(currentView==='finance')c.innerHTML=vFinance();
+  else if(currentView==='people')c.innerHTML=vPeople();
+  else if(currentView==='operations')c.innerHTML=vOperations();
+  else if(currentView==='talent')c.innerHTML=vTalent();
+  else if(currentView==='revenue')c.innerHTML=vRevenue();
+  requestAnimationFrame(()=>drawAll());
+}
+function marker(num,title,dek){return `<div class="section-marker"><span class="section-num">${num}</span><span class="section-title">${title}</span>${dek?`<span class="section-dek">${dek}</span>`:''}</div>`;}
+function statBlock(label,num,unit,delta,deltaType,foot,panel){
+  const arrow=deltaType==='up'?'▲':deltaType==='dn'?'▼':'';
+  return `<div class="stat" onclick="openDrawer('${panel}')"><div class="stat-label">${label}</div><div class="stat-num">${num}${unit?`<span class="stat-unit">${unit}</span>`:''}</div><div class="stat-foot">${delta?`<span class="stat-delta ${deltaType}">${arrow} ${delta}</span>`:''}${foot}</div></div>`;
+}
+
+// ── THE BRIEFING (lede + everything important) ──
+function vBriefing(){
+  const F=D.finance,W=D.workforce,T=D.tasks;
+  const spent=pct(F.budgetSpent,F.budgetTotal);
+  const green=D.departments.filter(x=>x.rag==='GREEN').length;
+  const urg=D.decisions.filter(x=>x.priority==='URGENT').length;
+  const overdueM=D.missions.filter(m=>m.status==='OVERDUE').length;
+  const attn=buildAttention();window._attn=attn;
+  const reds=attn.filter(i=>i.sev==='red').length;
+  // narrative lede
+  const opening=reds===0&&T.blocked===0?'The business is in good order this period.':reds>2?'The business is under pressure on several fronts.':'The business is broadly steady, with a few items needing attention.';
+  const lede=`${opening} The workforce stands at <b>${W.total}</b>, with <b>${W.onSite}</b> on-site today and attendance at <b>${W.attendance}%</b>. Budget is <b>${spent}%</b> consumed${spent>70?', running slightly ahead of plan':', tracking to plan'}, leaving <b>${F.currency} ${fmtK(F.budgetTotal-F.budgetSpent)}</b>. Of ${T.total} tracked initiatives, <b>${pct(T.completed,T.total)}%</b> are complete${T.blocked?`, though <span class="hot">${T.blocked} remain blocked</span>`:''}. ${urg?`<span class="hot">${urg} decision${urg>1?'s':''} await${urg>1?'':'s'} sign-off.</span>`:'No decisions are outstanding.'}`;
+
+  return `${marker('§ 01','Executive Briefing',new Date().toLocaleDateString('en-US',{month:'long',day:'numeric'}))}
+  <p class="lede"><span class="drop">${opening.charAt(0)}</span>${lede.substring(1)}</p>
+  <div class="row cols-4">
+    ${statBlock('Budget Consumed',spent,'%','vs 70% plan',spent<=70?'up':'dn','of allocation','finance')}
+    ${statBlock('Headcount',W.total,'','+'+W.newHires,'up','active staff','people')}
+    ${statBlock('Initiatives Done',pct(T.completed,T.total),'%',T.overdue+' overdue',T.overdue>5?'dn':'nt','of '+T.total,'tasks')}
+    ${statBlock('Awaiting Sign-off',D.decisions.length,'',urg+' urgent','dn','decisions','decisions')}
+  </div>
+  <div class="grid-plain gp-2">
+    <div class="attn-block">
+      <div class="art-head" style="padding-bottom:14px;margin-bottom:18px"><div><div class="art-kicker">What Demands Attention</div><div class="art-title">Priorities, ranked</div></div><div class="art-meta">${attn.length} item${attn.length!==1?'s':''}</div></div>
+      ${attn.length?attn.slice(0,6).map((it,i)=>`<div class="attn-item" onclick="window._attn[${i}].act()"><div class="attn-rank">${String(i+1).padStart(2,'0')}</div><div class="attn-body"><div class="attn-sev ${it.sev}">${it.sev==='red'?'Critical':'Watch'}</div><div class="attn-t">${it.t}</div><div class="attn-s">${it.s}</div></div></div>`).join(''):'<p style="font-family:var(--read);font-style:italic;color:var(--ink-3);padding:20px 0">Nothing demands attention. All areas are operating within healthy ranges.</p>'}
+    </div>
+    <div class="art">
+      <div class="art-head"><div><div class="art-kicker">Finance</div><div class="art-title">Budget against plan</div></div></div>
+      <div class="donut-row"><div class="donut-c" style="width:120px;height:120px"><canvas id="cBudget" width="120" height="120"></canvas><div class="donut-mid"><div class="b">${spent}%</div><div class="s">consumed</div></div></div>
+      <div style="flex:1"><div style="font-family:var(--read);font-size:14px;color:var(--ink-3);font-style:italic;margin-bottom:4px">Remaining this period</div><div style="font-family:var(--serif);font-size:30px;font-weight:700;letter-spacing:-1px;color:var(--green)">${F.currency} ${fmtK(F.budgetTotal-F.budgetSpent)}</div>
+      <div style="margin-top:14px;padding:11px 14px;background:var(--amber-soft);font-family:var(--read);font-size:13px;font-style:italic;color:#7a5214">At current burn, funds exhaust on <b style="font-style:normal">${F.forecastDate}</b>.</div></div></div>
+    </div>
+  </div>
+  <div class="grid-plain gp-3">
+    <div class="art"><div class="art-head"><div><div class="art-kicker">People</div><div class="art-title">Who is in</div></div></div>
+      <div class="lst">
+        <div class="lrow"><span class="lrow-dot" style="background:var(--green)"></span><div class="lrow-m"><div class="lrow-t">${W.onSite} on-site</div></div><span class="leg-v">${pct(W.onSite,W.total)}%</span></div>
+        <div class="lrow"><span class="lrow-dot" style="background:var(--blue)"></span><div class="lrow-m"><div class="lrow-t">${W.remote} remote</div></div><span class="leg-v">${pct(W.remote,W.total)}%</span></div>
+        <div class="lrow"><span class="lrow-dot" style="background:var(--amber)"></span><div class="lrow-m"><div class="lrow-t">${W.onMission} on mission</div></div><span class="leg-v">${pct(W.onMission,W.total)}%</span></div>
+        <div class="lrow"><span class="lrow-dot" style="background:var(--ink-4)"></span><div class="lrow-m"><div class="lrow-t">${W.sickLeave+W.annualLeave+W.other} on leave</div></div><span class="leg-v">${pct(W.sickLeave+W.annualLeave+W.other,W.total)}%</span></div>
+      </div>
+    </div>
+    <div class="art"><div class="art-head"><div><div class="art-kicker">Execution</div><div class="art-title">Initiative status</div></div></div>
+      <div class="donut-row"><div class="donut-c" style="width:100px;height:100px"><canvas id="cTasks" width="100" height="100"></canvas><div class="donut-mid"><div class="b">${pct(T.completed,T.total)}%</div></div></div>
+      <div class="legend"><div class="leg"><span class="leg-d" style="background:var(--green)"></span><span class="leg-l">Done</span><span class="leg-v">${T.completed}</span></div><div class="leg"><span class="leg-d" style="background:var(--blue)"></span><span class="leg-l">Active</span><span class="leg-v">${T.inProgress}</span></div><div class="leg"><span class="leg-d" style="background:var(--red)"></span><span class="leg-l">Blocked</span><span class="leg-v">${T.blocked}</span></div></div></div>
+    </div>
+    <div class="art"><div class="art-head"><div><div class="art-kicker">Departments</div><div class="art-title">Health at a glance</div></div></div>
+      <div class="lst">${D.departments.slice(0,5).map((d,i)=>`<div class="lrow" onclick="openDrawer('department',${i})"><span class="lrow-dot" style="background:${ragc(d.rag)}"></span><div class="lrow-m"><div class="lrow-t" style="font-size:15px">${d.name}</div></div>${sflag(d.rag)}</div>`).join('')}</div>
+    </div>
+  </div>
+  ${D.revenue&&D.revenue.enabled?`${marker('§ 02','Revenue','optional module')}<div class="row cols-4">
+    ${statBlock('MRR',D.revenue.currency+' '+fmtK(D.revenue.mrr),'',pct(D.revenue.mrr,D.revenue.mrrTarget)+'% target',pct(D.revenue.mrr,D.revenue.mrrTarget)>=100?'up':'nt','recurring','revenue')}
+    ${statBlock('ARR',D.revenue.currency+' '+fmtK(D.revenue.arr),'','annualized','up','run rate','revenue')}
+    ${statBlock('Clients',D.revenue.totalClients,'','+'+(D.revenue.newClients-D.revenue.churnedClients),'up','net new','revenue')}
+    ${statBlock('NPS',D.revenue.nps,'','sentiment',D.revenue.nps>50?'up':'nt','satisfaction','revenue')}
+  </div>`:''}`;
+}
+
+// ── FINANCE ──
+function vFinance(){const F=D.finance;const spent=pct(F.budgetSpent,F.budgetTotal);
+  return `${marker('§','Finance','Budget, spend & forecast')}
+  <div class="row cols-4">
+    ${statBlock('Total Budget',F.currency+' '+fmtK(F.budgetTotal),'',F.period,'nt','allocated','finance')}
+    ${statBlock('Spent',F.currency+' '+fmtK(F.budgetSpent),'',spent+'%','nt','consumed','finance')}
+    ${statBlock('Remaining',F.currency+' '+fmtK(F.budgetTotal-F.budgetSpent),'',(100-spent)+'%','up','available','finance')}
+    ${statBlock('Exhaust Date',F.forecastDate.split(',')[0],'','forecast','nt','at current burn','finance')}
+  </div>
+  <div class="grid-plain gp-2">
+    <div class="art"><div class="art-head"><div><div class="art-kicker">Trend</div><div class="art-title">Monthly spend</div></div><div class="art-meta">${F.currency} '000</div></div><div class="fig"><div style="position:relative;height:260px"><canvas id="cSpend"></canvas></div><div class="fig-cap"><span>Fig. 1 — Spend by month</span><span>${F.period}</span></div></div></div>
+    <div class="art"><div class="art-head"><div><div class="art-kicker">Allocation</div><div class="art-title">By department</div></div></div>
+    ${F.deptBudgets.map(d=>`<div class="tbar"><div class="tbar-top"><span class="tbar-l">${d.name}</span><span class="tbar-v">${d.pct}%</span></div><div class="tbar-track"><div class="tbar-fill" style="width:${d.pct}%;background:${d.pct>=80?'var(--red)':d.pct>=60?'var(--amber)':'var(--accent)'}"></div></div></div>`).join('')}</div>
+  </div>`;
+}
+
+// ── PEOPLE ──
+function vPeople(){const W=D.workforce;const overdueM=D.missions.filter(m=>m.status==='OVERDUE').length;
+  return `${marker('§','People','Workforce, presence & field')}
+  <div class="row cols-4">
+    ${statBlock('Headcount',W.total,'','+'+W.newHires,'up','active','workforce')}
+    ${statBlock('Present Today',W.onSite+W.remote,'',pct(W.onSite+W.remote,W.total)+'%','up','working','presence')}
+    ${statBlock('Avg Hours',W.avgHrs,'','per week','nt','per person','workforce')}
+    ${statBlock('Attrition',W.attrition,'%','rolling',W.attrition>5?'dn':'up','annualized','workforce')}
+  </div>
+  <div class="grid-plain gp-2e">
+    <div class="art"><div class="art-head"><div><div class="art-kicker">Presence</div><div class="art-title">Where everyone is</div></div></div>
+      <div class="lst">
+        ${[['On-site',W.onSite,'var(--green)'],['Remote',W.remote,'var(--blue)'],['On mission',W.onMission,'var(--amber)'],['Sick leave',W.sickLeave,'var(--red)'],['Annual leave',W.annualLeave,'var(--ink-3)'],['Other',W.other,'var(--ink-4)']].map(([l,v,c])=>`<div class="lrow"><span class="lrow-dot" style="background:${c}"></span><div class="lrow-m"><div class="lrow-t" style="font-size:15px">${l}</div></div><span class="leg-v">${v}</span><span class="leg-pct">${pct(v,W.total)}%</span></div>`).join('')}
+      </div>
+      <div style="margin-top:18px"><div class="tbar"><div class="tbar-top"><span class="tbar-l">Attendance rate</span><span class="tbar-v">${W.attendance}%</span></div><div class="tbar-track"><div class="tbar-fill" style="width:${W.attendance}%;background:var(--green)"></div></div></div></div>
+    </div>
+    <div class="art"><div class="art-head"><div><div class="art-kicker">Trend</div><div class="art-title">Headcount over time</div></div></div><div class="fig"><div style="position:relative;height:200px"><canvas id="cHC"></canvas></div><div class="fig-cap"><span>Fig. — Six-month headcount</span><span>+${W.newHires} / −${W.departures} this month</span></div></div></div>
+  </div>
+  <div class="grid-plain gp-1"><div class="art"><div class="art-head"><div><div class="art-kicker">Field</div><div class="art-title">Active missions</div></div><div class="art-meta">${D.missions.length} deployed</div></div>
+  <table class="dtbl"><thead><tr><th>Employee</th><th>Destination</th><th>Purpose</th><th>Window</th><th>Status</th></tr></thead><tbody>
+  ${D.missions.map((m,i)=>`<tr onclick="openDrawer('mission',${i})"><td class="name">${m.name}</td><td>${m.destination}</td><td>${m.purpose}</td><td class="mono">${m.from} – ${m.to}</td><td>${sflag(m.status)}</td></tr>`).join('')}
+  </tbody></table>${overdueM?`<div class="dw-note r" style="margin-top:18px">${overdueM} mission${overdueM>1?'s have':' has'} exceeded the seven-day limit and require${overdueM>1?'':'s'} review.</div>`:''}</div></div>`;
+}
+
+// ── OPERATIONS ──
+function vOperations(){const T=D.tasks;const urg=D.decisions.filter(x=>x.priority==='URGENT').length;
+  return `${marker('§','Operations','Execution, decisions, risk & capacity')}
+  <div class="grid-plain gp-2e">
+    <div class="art"><div class="art-head"><div><div class="art-kicker">Decisions</div><div class="art-title">Awaiting sign-off</div></div><div class="art-meta">${urg} urgent</div></div>
+    <table class="dtbl"><thead><tr><th>Item</th><th>Owner</th><th>Wait</th><th>Priority</th></tr></thead><tbody>
+    ${D.decisions.map((d,i)=>`<tr onclick="openDrawer('decision',${i})"><td class="name" style="font-size:15px">${d.title}</td><td>${d.owner}</td><td class="mono">${d.days}d</td><td>${sflag(d.priority)}</td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="art"><div class="art-head"><div><div class="art-kicker">Risk</div><div class="art-title">Register</div></div><div class="art-meta">${D.risks.length} active</div></div>
+    ${D.risks.map((r,i)=>`<div class="lrow" onclick="openDrawer('risk',${i})"><div class="lrow-mono" style="font-family:var(--serif);font-size:22px;font-weight:700;color:${ragc(r.level==='HIGH'?'RED':r.level==='MEDIUM'?'AMBER':'GREEN')};width:32px">${r.score}</div><div class="lrow-m"><div class="lrow-t" style="font-size:15px">${r.title}</div><div class="lrow-s">${r.owner} — ${r.mitigation}</div></div>${sflag(r.level)}</div>`).join('')}</div>
+  </div>
+  <div class="grid-plain gp-2e">
+    <div class="art"><div class="art-head"><div><div class="art-kicker">Execution</div><div class="art-title">Initiative status</div></div></div>
+    <div class="donut-row"><div class="donut-c" style="width:120px;height:120px"><canvas id="cTasks" width="120" height="120"></canvas><div class="donut-mid"><div class="b">${pct(T.completed,T.total)}%</div><div class="s">complete</div></div></div>
+    <div class="legend"><div class="leg"><span class="leg-d" style="background:var(--green)"></span><span class="leg-l">Done</span><span class="leg-v">${T.completed}</span></div><div class="leg"><span class="leg-d" style="background:var(--blue)"></span><span class="leg-l">Active</span><span class="leg-v">${T.inProgress}</span></div><div class="leg"><span class="leg-d" style="background:var(--red)"></span><span class="leg-l">Blocked</span><span class="leg-v">${T.blocked}</span></div><div class="leg"><span class="leg-d" style="background:var(--amber)"></span><span class="leg-l">Overdue</span><span class="leg-v">${T.overdue}</span></div></div></div></div>
+    <div class="art"><div class="art-head"><div><div class="art-kicker">Capacity</div><div class="art-title">Team utilization</div></div></div>
+    ${D.departments.map(d=>{const c=d.utilization>=90?'var(--red)':d.utilization>=75?'var(--amber)':d.utilization>=50?'var(--green)':'var(--blue)';return `<div class="tbar"><div class="tbar-top"><span class="tbar-l">${d.name}</span><span class="tbar-v" style="color:${c}">${d.utilization}%</span></div><div class="tbar-track"><div class="tbar-fill" style="width:${d.utilization}%;background:${c}"></div></div></div>`;}).join('')}</div>
+  </div>
+  <div class="grid-plain gp-1"><div class="art"><div class="art-head"><div><div class="art-kicker">Departments</div><div class="art-title">Full health register</div></div></div>
+  <table class="dtbl"><thead><tr><th>Department</th><th>Staff</th><th>Tasks</th><th>Budget</th><th>Utilization</th><th>Status</th></tr></thead><tbody>
+  ${D.departments.map((d,i)=>`<tr onclick="openDrawer('department',${i})"><td class="name">${d.name}</td><td class="mono">${d.staff}</td><td class="mono">${d.tasksPct}%</td><td class="mono">${d.budgetPct}%</td><td class="mono">${d.utilization}%</td><td>${sflag(d.rag)}</td></tr>`).join('')}
+  </tbody></table></div></div>
+  <div class="grid-plain gp-1"><div class="art"><div class="art-head"><div><div class="art-kicker">Systems</div><div class="art-title">Infrastructure status</div></div></div>
+  ${D.it.map(s=>{const c=s.status==='ok'?'var(--green)':s.status==='wn'?'var(--amber)':'var(--red)';return `<div class="sys"><div class="sys-l"><span class="d" style="background:${c}"></span>${s.name}</div><div class="sys-v" style="color:${c}">${s.value}</div></div>`;}).join('')}</div></div>`;
+}
+
+// ── TALENT ──
+function vTalent(){const H=D.hiring;
+  return `${marker('§','Talent','Recruitment & communications')}
+  <div class="row cols-4">
+    ${statBlock('Open Roles',H.openRoles,'','hiring','nt','positions','hiring')}
+    ${statBlock('In Pipeline',H.pipeline.reduce((s,p)=>s+p.count,0),'','candidates','nt','total','hiring')}
+    ${statBlock('Time to Hire',H.avgDays,'d','average','nt','per role','hiring')}
+    ${statBlock('Conversion',H.conversionPct,'%','offer→join','up','rate','hiring')}
+  </div>
+  <div class="grid-plain gp-2">
+    <div class="art"><div class="art-head"><div><div class="art-kicker">Pipeline</div><div class="art-title">Recruitment funnel</div></div></div>
+    <div class="pipe">${H.pipeline.map(p=>`<div class="pipe-s"><div class="pipe-v">${p.count}</div><div class="pipe-l">${p.stage}</div></div>`).join('')}</div>
+    <div style="margin-top:20px">${(H.deptRoles||[]).map(r=>`<div class="tbar"><div class="tbar-top"><span class="tbar-l">${r.dept}</span><span class="tbar-v">${r.count}</span></div><div class="tbar-track"><div class="tbar-fill" style="width:${pct(r.count,H.openRoles)}%;background:var(--accent)"></div></div></div>`).join('')}</div></div>
+    <div class="art"><div class="art-head"><div><div class="art-kicker">Notices</div><div class="art-title">Announcements</div></div></div>
+    ${D.announcements.map(a=>`<div class="note"><div class="note-t">${a.title}</div><div class="note-b">${a.body}</div><div class="note-m">${a.date} — ${a.by}</div></div>`).join('')}</div>
+  </div>
+  <div class="grid-plain gp-1"><div class="art"><div class="art-head"><div><div class="art-kicker">Calendar</div><div class="art-title">Upcoming events</div></div></div>
+  <table class="dtbl"><thead><tr><th>Date</th><th>Event</th><th>Department</th><th>Type</th></tr></thead><tbody>
+  ${D.events.map(e=>`<tr><td class="name" style="font-size:15px">${e.month} ${e.day}</td><td>${e.title}</td><td>${e.dept}</td><td>${sflag(e.type)}</td></tr>`).join('')}
+  </tbody></table></div></div>`;
+}
+
+// ── REVENUE ──
+function vRevenue(){const R=D.revenue;if(!R||!R.enabled)return marker('§','Revenue','disabled')+'<p class="lede">This module is turned off. Enable it in settings.</p>';
+  const mp=pct(R.mrr,R.mrrTarget);
+  return `${marker('§','Revenue & Customers','Recurring revenue & client health')}
+  <div class="row cols-4">
+    ${statBlock('MRR',R.currency+' '+fmtK(R.mrr),'',mp+'% of target',mp>=100?'up':'nt','recurring','revenue')}
+    ${statBlock('ARR',R.currency+' '+fmtK(R.arr),'','annualized','up','run rate','revenue')}
+    ${statBlock('Clients',R.totalClients,'','+'+(R.newClients-R.churnedClients),'up','net new','revenue')}
+    ${statBlock('NPS',R.nps,'','sentiment',R.nps>50?'up':'nt','satisfaction','revenue')}
+  </div>
+  <div class="grid-plain gp-2">
+    <div class="art"><div class="art-head"><div><div class="art-kicker">Trend</div><div class="art-title">Monthly recurring revenue</div></div><div class="art-meta">${R.currency} '000</div></div><div class="fig"><div style="position:relative;height:260px"><canvas id="cRev"></canvas></div><div class="fig-cap"><span>Fig. — MRR by month</span><span>Target ${R.currency} ${fmtK(R.mrrTarget)}</span></div></div></div>
+    <div class="art"><div class="art-head"><div><div class="art-kicker">Growth</div><div class="art-title">Key figures</div></div></div>
+    <div class="tbar"><div class="tbar-top"><span class="tbar-l">MRR vs target</span><span class="tbar-v">${mp}%</span></div><div class="tbar-track"><div class="tbar-fill" style="width:${Math.min(mp,100)}%;background:var(--accent)"></div><div class="tbar-target" style="left:100%"></div></div></div>
+    <div class="minis"><div class="mini"><div class="mini-v" style="color:var(--green)">+${R.newClients}</div><div class="mini-l">New</div></div><div class="mini"><div class="mini-v" style="color:var(--red)">${R.churnedClients}</div><div class="mini-l">Churned</div></div></div>
+    <div class="minis"><div class="mini"><div class="mini-v" style="color:var(--ink)">${fmtK(R.pipeline)}</div><div class="mini-l">Pipeline</div></div><div class="mini"><div class="mini-v" style="color:var(--green)">${fmtK(R.wonThisMonth)}</div><div class="mini-l">Won MTD</div></div></div></div>
+  </div>
+  <div class="grid-plain gp-1"><div class="art"><div class="art-head"><div><div class="art-kicker">Accounts</div><div class="art-title">Top clients by value</div></div></div>
+  <table class="dtbl"><thead><tr><th>Client</th><th>Annual Value</th><th>Status</th></tr></thead><tbody>
+  ${R.topClients.map(c=>`<tr><td class="name">${c.name}</td><td class="mono">${R.currency} ${fmt(c.value)}</td><td>${sflag(c.status)}</td></tr>`).join('')}
+  </tbody></table></div></div>`;
+}
+
+// ════ CHARTS ════
+function drawAll(){drawBudget();drawSpend();drawHC();drawTasks();drawRev();}
+const INK='#1c1a17',INK3='#8a8276',RULE='#ddd6c8',ACCENT='#9a3b2e';
+function drawBudget(){const c=document.getElementById('cBudget');if(!c)return;const ctx=c.getContext('2d');const W=c.width,tgt=D.finance.budgetSpent/D.finance.budgetTotal;let p=0;const R=W/2-10;
+  (function a(){ctx.clearRect(0,0,W,W);ctx.beginPath();ctx.arc(W/2,W/2,R,0,Math.PI*2);ctx.strokeStyle='#e6dfd0';ctx.lineWidth=10;ctx.stroke();
+  ctx.beginPath();ctx.arc(W/2,W/2,R,-Math.PI/2,-Math.PI/2+p*Math.PI*2);ctx.strokeStyle=ACCENT;ctx.lineWidth=10;ctx.lineCap='butt';ctx.stroke();
+  if(p<tgt){p=Math.min(p+0.03,tgt);requestAnimationFrame(a);}})();}
+function drawSpend(){const e=document.getElementById('cSpend');if(!e)return;if(charts.spend)charts.spend.destroy();
+  charts.spend=new Chart(e.getContext('2d'),{type:'line',data:{labels:D.finance.monthlySpend.map(m=>m.month),datasets:[{data:D.finance.monthlySpend.map(m=>m.val),borderColor:ACCENT,backgroundColor:'rgba(154,59,46,0.06)',borderWidth:2,fill:true,tension:0.3,pointRadius:3,pointBackgroundColor:ACCENT}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>' '+D.finance.currency+' '+x.raw+'K'}}},scales:{x:{ticks:{color:INK3,font:{size:11,family:'IBM Plex Mono'}},grid:{display:false}},y:{ticks:{color:INK3,font:{size:10,family:'IBM Plex Mono'}},grid:{color:RULE},border:{display:false}}}}});}
+function drawHC(){const e=document.getElementById('cHC');if(!e)return;if(charts.hc)charts.hc.destroy();const v=D.workforce.history.map(h=>h.val);
+  charts.hc=new Chart(e.getContext('2d'),{type:'bar',data:{labels:D.workforce.history.map(h=>h.month),datasets:[{data:v,backgroundColor:'#3a5a7d',barThickness:20}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:INK3,font:{size:10,family:'IBM Plex Mono'}},grid:{display:false}},y:{min:Math.min(...v)-6,ticks:{color:INK3,font:{size:10,family:'IBM Plex Mono'}},grid:{color:RULE},border:{display:false}}}}});}
+function drawTasks(){const e=document.getElementById('cTasks');if(!e)return;if(charts.tasks)charts.tasks.destroy();const t=D.tasks;
+  charts.tasks=new Chart(e.getContext('2d'),{type:'doughnut',data:{labels:['Done','Active','Blocked','Overdue'],datasets:[{data:[t.completed,t.inProgress,t.blocked,t.overdue],backgroundColor:['#3f6b4d','#3a5a7d','#a13428','#b67a1f'],borderWidth:2,borderColor:'#fbfaf6',hoverOffset:3}]},options:{responsive:false,cutout:'70%',plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>' '+x.label+': '+x.raw}}}}});}
+function drawRev(){const e=document.getElementById('cRev');if(!e||!D.revenue)return;if(charts.rev)charts.rev.destroy();
+  charts.rev=new Chart(e.getContext('2d'),{type:'line',data:{labels:D.revenue.trend.map(m=>m.month),datasets:[{data:D.revenue.trend.map(m=>m.val),borderColor:ACCENT,backgroundColor:'rgba(154,59,46,0.06)',borderWidth:2,fill:true,tension:0.3,pointRadius:3,pointBackgroundColor:ACCENT}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>' '+D.revenue.currency+' '+x.raw+'K'}}},scales:{x:{ticks:{color:INK3,font:{size:11,family:'IBM Plex Mono'}},grid:{display:false}},y:{ticks:{color:INK3,font:{size:10,family:'IBM Plex Mono'}},grid:{color:RULE},border:{display:false}}}}});}
+
+// ════ DRAWER ════
+function openDrawer(type,idx=0){
+  const F=D.finance,W=D.workforce;let k='Detail',t='',b='';
+  if(type==='finance'){const sp=pct(F.budgetSpent,F.budgetTotal);k='Finance';t='Budget in full';
+    b=dsec('Overview',[['Total Budget',F.currency+' '+fmt(F.budgetTotal),'b'],['Spent',F.currency+' '+fmt(F.budgetSpent),'r'],['Remaining',F.currency+' '+fmt(F.budgetTotal-F.budgetSpent),'g'],['Utilization',sp+'%',sp>80?'a':''],['Period',F.period,''],['Forecast Exhaust',F.forecastDate,'a']])+dsec('By Department',F.deptBudgets.map(d=>[d.name,d.pct+'%',d.pct>80?'a':d.pct>60?'':'g']))+dsec('Monthly Spend',F.monthlySpend.map(m=>[m.month,F.currency+' '+fmt(m.val)+'K','']));}
+  else if(type==='workforce'||type==='presence'){k='People';t='Workforce in full';
+    b=dsec('Today',[['Total Active',W.total,'b'],['On-site',W.onSite+' ('+pct(W.onSite,W.total)+'%)','g'],['Remote',W.remote,'b'],['On mission',W.onMission,'a'],['Sick leave',W.sickLeave,'r'],['Annual leave',W.annualLeave,''],['Other',W.other,'']])+dsec('Metrics',[['New hires','+'+W.newHires,'g'],['Departures',W.departures,'r'],['Avg hours/week',W.avgHrs,''],['Attrition',W.attrition+'%',W.attrition>5?'r':'g'],['Attendance',W.attendance+'%','g']])+dsec('History',W.history.map(h=>[h.month,h.val,'']));}
+  else if(type==='mission'){const m=D.missions[idx];k='Mission';t=m.name;b=dsec('Assignment',[['Employee',m.name,''],['Destination',m.destination,'b'],['Purpose',m.purpose,''],['Departure',m.from,''],['Return',m.to,''],['Status',m.status,m.status==='OVERDUE'?'r':'a']])+(m.status==='OVERDUE'?dnote('r','This deployment has exceeded the seven-day limit. Confirmation of return is required.'):'');}
+  else if(type==='tasks'){const T=D.tasks;k='Execution';t='Initiatives in full';b=dsec('Summary',[['Total',T.total,''],['Completed',T.completed+' ('+pct(T.completed,T.total)+'%)','g'],['In progress',T.inProgress,'b'],['Blocked',T.blocked,'r'],['Overdue',T.overdue,'a']])+ditems('Tracked',T.list.map(tk=>({t:tk.name,m:[tk.dept,tk.status,tk.date]})));}
+  else if(type==='decisions'){k='Decisions';t='Awaiting sign-off';b=dsec('Summary',[['Total',D.decisions.length,'r'],['Urgent',D.decisions.filter(x=>x.priority==='URGENT').length,'r'],['Medium',D.decisions.filter(x=>x.priority==='MEDIUM').length,'a']])+ditems('Items',D.decisions.map(d=>({t:d.title,m:[d.priority,d.owner,d.days+'d']})));}
+  else if(type==='decision'){const d=D.decisions[idx];k='Decision';t=d.type;b=dsec('Detail',[['Type',d.type,'b'],['Description',d.title,''],['Owner',d.owner,''],['Waiting',d.days+' days',d.days>=4?'r':'a'],['Priority',d.priority,d.priority==='URGENT'?'r':'a']]);}
+  else if(type==='risk'){const r=D.risks[idx];k='Risk';t='Score '+r.score+' / 10';b=dsec('Detail',[['Risk',r.title,''],['Owner',r.owner,'b'],['Level',r.level,r.level==='HIGH'?'r':'a'],['Likelihood',r.likelihood+'/10','a'],['Impact',r.impact+'/10','r']])+dnote('a',r.mitigation);}
+  else if(type==='department'){const d=D.departments[idx];k='Department';t=d.name;b=dsec('Health',[['Status',d.rag,d.rag==='GREEN'?'g':d.rag==='AMBER'?'a':'r'],['Staff',d.staff,'b'],['Tasks done',d.tasksPct+'%',d.tasksPct>=80?'g':'a'],['Budget used',d.budgetPct+'%',d.budgetPct>=80?'a':''],['Utilization',d.utilization+'%',d.utilization>=90?'r':'g']])+((d.rag!=='GREEN')?dnote('a','This department warrants management attention.'):'');}
+  else if(type==='hiring'){const h=D.hiring;k='Talent';t='Recruitment in full';b=dsec('Pipeline',h.pipeline.map(p=>[p.stage,p.count,'b']))+dsec('Metrics',[['Open roles',h.openRoles,''],['Time to hire',h.avgDays+'d','b'],['Offers out',h.offersPending,'a'],['Conversion',h.conversionPct+'%','g']]);}
+  else if(type==='revenue'){const R=D.revenue;k='Revenue';t='Customers in full';b=dsec('Recurring',[['MRR',R.currency+' '+fmt(R.mrr),'b'],['Target',R.currency+' '+fmt(R.mrrTarget),''],['ARR',R.currency+' '+fmt(R.arr),'g'],['Pipeline',R.currency+' '+fmt(R.pipeline),''],['Won MTD',R.currency+' '+fmt(R.wonThisMonth),'g']])+dsec('Customers',[['Total clients',R.totalClients,'b'],['New','+'+R.newClients,'g'],['Churned',R.churnedClients,'r'],['NPS',R.nps,'g']])+ditems('Top Accounts',R.topClients.map(c=>({t:c.name,m:[R.currency+' '+fmt(c.value),c.status]})));}
+  document.getElementById('dwk').textContent=k;document.getElementById('dwt').textContent=t;document.getElementById('dwb').innerHTML=b;
+  document.getElementById('drawer').classList.add('open');document.getElementById('scrim').classList.add('on');
+}
+function dsec(title,rows){return `<div class="dw-sec"><div class="dw-sl">${title}</div>${rows.map(([l,v,c])=>`<div class="dw-st"><span class="dw-st-l">${l}</span><span class="dw-st-v ${c||''}">${v}</span></div>`).join('')}</div>`;}
+function ditems(title,items){return `<div class="dw-sec"><div class="dw-sl">${title}</div>${items.map(it=>`<div class="dw-item"><div class="dw-item-t">${it.t}</div><div class="dw-item-m">${it.m.map(x=>`<span>${x}</span>`).join('')}</div></div>`).join('')}</div>`;}
+function dnote(c,txt){return `<div class="dw-note ${c}">${txt}</div>`;}
+function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('scrim').classList.remove('on');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
+
+let aiOpen=false;
+function toggleAI(){aiOpen=!aiOpen;document.getElementById('ai-panel').classList.toggle('open',aiOpen);if(aiOpen)setTimeout(()=>document.getElementById('ai-input').focus(),300);}
+
+const SUGGESTIONS=[
+  "How much budget is left?",
+  "Who is on mission?",
+  "What needs my approval?",
+  "Show overdue tasks",
+  "Which team is overloaded?",
+  "What are the top risks?",
+  "How many people are on-site?",
+  "Department health summary"
+];
+
+function initAI(){
+  const body=document.getElementById('ai-body');
+  body.innerHTML='';
+  botSay(`Hello — I'm your NEXUS assistant. I read directly from your loaded data and work completely offline. Ask me anything about <b>budget</b>, <b>people</b>, <b>tasks</b>, <b>missions</b>, <b>risks</b>, <b>decisions</b>, or <b>departments</b>.`);
+  renderSuggestions();
+}
+function renderSuggestions(){
+  const s=document.getElementById('ai-suggest');
+  const picks=SUGGESTIONS.slice().sort(()=>Math.random()-0.5).slice(0,4);
+  s.innerHTML=picks.map(q=>`<button class="ai-chip" onclick="askChip('${q.replace(/'/g,"\\'")}')">${q}</button>`).join('');
+}
+function askChip(q){document.getElementById('ai-input').value=q;aiSend();}
+
+function botSay(html){
+  const body=document.getElementById('ai-body');
+  const d=document.createElement('div');d.className='ai-msg bot';
+  d.innerHTML=`<div class="ai-msg-av"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 015 5v1a5 5 0 01-5 5 5 5 0 01-5-5V7a5 5 0 015-5z"/><path d="M12 13v3m-4 5h8a2 2 0 002-2 5 5 0 00-5-5h-2a5 5 0 00-5 5 2 2 0 002 2z"/></svg></div><div class="ai-bubble">${html}</div>`;
+  body.appendChild(d);body.scrollTop=body.scrollHeight;
+}
+function userSay(txt){
+  const body=document.getElementById('ai-body');
+  const d=document.createElement('div');d.className='ai-msg user';
+  d.innerHTML=`<div class="ai-msg-av">YOU</div><div class="ai-bubble">${txt}</div>`;
+  body.appendChild(d);body.scrollTop=body.scrollHeight;
+}
+function showTyping(){
+  const body=document.getElementById('ai-body');
+  const d=document.createElement('div');d.className='ai-msg bot';d.id='typing';
+  d.innerHTML=`<div class="ai-msg-av"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 015 5v1a5 5 0 01-5 5 5 5 0 01-5-5V7a5 5 0 015-5z"/></svg></div><div class="ai-bubble"><div class="ai-typing"><span></span><span></span><span></span></div></div>`;
+  body.appendChild(d);body.scrollTop=body.scrollHeight;
+}
+function hideTyping(){const t=document.getElementById('typing');if(t)t.remove();}
+
+function aiSend(){
+  const inp=document.getElementById('ai-input');
+  const q=inp.value.trim();if(!q)return;
+  userSay(q);inp.value='';
+  showTyping();
+  setTimeout(()=>{hideTyping();botSay(answer(q));renderSuggestions();},500+Math.random()*400);
+}
+
+function M(v){return `<span class="metric">${v}</span>`;}
+
+// ── The query engine ──
+function answer(raw){
+  const q=raw.toLowerCase();
+  const F=D.finance,W=D.workforce;
+  const has=(...words)=>words.some(w=>q.includes(w));
+
+  // GREETINGS
+  if(has('hello','hi ','hey','greetings')&&q.length<12) return `Hello — ready when you are. Try asking about budget, staff, or what needs your approval.`;
+  if(has('thank','thanks')) return `You're welcome. Anything else you'd like to check?`;
+  if(has('help','what can you')) return `I can answer questions about your live data, such as:<ul><li><span class="li-dot">→</span>Budget spent, remaining, and forecast</li><li><span class="li-dot">→</span>Headcount, who's on-site, remote, or on leave</li><li><span class="li-dot">→</span>Tasks completed, blocked, or overdue</li><li><span class="li-dot">→</span>Active missions and travel</li><li><span class="li-dot">→</span>Pending decisions and risks</li><li><span class="li-dot">→</span>Department health and capacity</li></ul>`;
+
+  // BUDGET
+  if(has('budget','spend','spent','money','cost','financ','fund')){
+    const sp=pct(F.budgetSpent,F.budgetTotal),rem=F.budgetTotal-F.budgetSpent;
+    if(has('left','remain','remaining'))
+      return `You have ${M(F.currency+' '+fmt(rem))} remaining — that's ${M((100-sp)+'%')} of the total ${M(F.currency+' '+fmt(F.budgetTotal))} budget. At the current burn rate, funds are forecast to be exhausted by <b>${F.forecastDate}</b>.`;
+    if(has('forecast','run out','exhaust','when'))
+      return `At the current spending rate, the budget is forecast to be exhausted by <b>${F.forecastDate}</b>. You've used ${M(sp+'%')} so far, with ${M(F.currency+' '+fmt(rem))} still available.`;
+    if(has('department','dept','breakdown','by team')){
+      const top=F.deptBudgets.slice().sort((a,b)=>b.pct-a.pct);
+      return `Here's budget usage by department:<ul>${top.map(d=>`<li><span class="li-dot">${d.pct>=80?'🔴':d.pct>=60?'🟡':'🟢'}</span><b>${d.name}</b> — ${d.pct}% used</li>`).join('')}</ul>${top[0].pct>=80?`<b>${top[0].name}</b> is the highest at ${top[0].pct}% — worth watching.`:''}`;
+    }
+    return `Budget status: ${M(sp+'%')} utilized. You've spent ${M(F.currency+' '+fmt(F.budgetSpent))} of ${M(F.currency+' '+fmt(F.budgetTotal))}, leaving ${M(F.currency+' '+fmt(rem))}. Forecast exhaust date is <b>${F.forecastDate}</b>.`;
+  }
+
+  // PRESENCE / ON-SITE
+  if(has('on-site','onsite','on site','in office','present','in the office')){
+    return `Right now ${M(W.onSite)} employees are on-site — that's ${M(pct(W.onSite,W.total)+'%')} of your ${M(W.total)}-person workforce. Another ${M(W.remote)} are working remotely and ${M(W.onMission)} are on mission.`;
+  }
+  if(has('remote','wfh','work from home','working from home')){
+    return `${M(W.remote)} employees are working remotely today, alongside ${M(W.onSite)} on-site and ${M(W.onMission)} on mission.`;
+  }
+  if(has('leave','sick','absent','off ')){
+    return `Currently ${M(W.sickLeave)} on sick leave and ${M(W.annualLeave)} on annual leave (${M(W.sickLeave+W.annualLeave)} total away). Attendance rate is ${M(W.attendance+'%')}.`;
+  }
+
+  // MISSIONS
+  if(has('mission','travel','field','deploy','away','trip')){
+    const active=D.missions.filter(m=>m.status!=='RETURN');
+    const overdue=D.missions.filter(m=>m.status==='OVERDUE');
+    let r=`${M(D.missions.length)} people are currently on mission:<ul>${D.missions.map(m=>`<li><span class="li-dot">${m.status==='OVERDUE'?'🔴':'📍'}</span><b>${m.name}</b> — ${m.destination} (${m.purpose}), ${m.from}→${m.to}</li>`).join('')}</ul>`;
+    if(overdue.length) r+=`<br>⚠ <b>${overdue.length} mission${overdue.length>1?'s have':' has'}</b> exceeded the 7-day limit and need${overdue.length>1?'':'s'} review: ${overdue.map(m=>m.name).join(', ')}.`;
+    return r;
+  }
+
+  // DECISIONS / APPROVAL
+  if(has('approv','decision','pending','sign off','sign-off','waiting','my desk','action')){
+    const urg=D.decisions.filter(d=>d.priority==='URGENT');
+    let r=`You have ${M(D.decisions.length)} decisions awaiting approval`;
+    if(urg.length) r+=`, including ${M(urg.length+' urgent')}`;
+    r+=`:<ul>${D.decisions.map(d=>`<li><span class="li-dot">${d.priority==='URGENT'?'🔴':d.priority==='MEDIUM'?'🟡':'🔵'}</span><b>${d.title}</b> — ${d.owner}, waiting ${d.days}d</li>`).join('')}</ul>`;
+    if(urg.length) r+=`<br>I'd prioritise the urgent items first — the longest has been waiting ${Math.max(...D.decisions.map(d=>d.days))} days.`;
+    return r;
+  }
+
+  // TASKS
+  if(has('task','overdue','blocked','complete','pending work','progress','project status')){
+    const t=D.tasks;
+    if(has('overdue')){
+      const od=t.list.filter(x=>x.status==='OVERDUE');
+      return `There ${t.overdue===1?'is':'are'} ${M(t.overdue)} overdue task${t.overdue!==1?'s':''} past deadline.${od.length?` For example: <b>${od[0].name}</b> (${od[0].dept}).`:''} These need immediate attention.`;
+    }
+    if(has('blocked')){
+      const bl=t.list.filter(x=>x.status==='BLOCKED');
+      return `${M(t.blocked)} task${t.blocked!==1?'s are':' is'} currently blocked.${bl.length?` Top item: <b>${bl[0].name}</b> — ${bl[0].date}.`:''} These may need escalation.`;
+    }
+    return `Task status: ${M(t.completed)} completed (${pct(t.completed,t.total)}%), ${M(t.inProgress)} in progress, ${M(t.blocked)} blocked, and ${M(t.overdue)} overdue — out of ${M(t.total)} total. ${t.blocked+t.overdue>0?`<br>⚠ ${t.blocked+t.overdue} items need attention (blocked or overdue).`:'Everything is on track.'}`;
+  }
+
+  // RISKS
+  if(has('risk','threat','exposure','danger','concern')){
+    const high=D.risks.filter(r=>r.level==='HIGH');
+    return `There ${D.risks.length===1?'is':'are'} ${M(D.risks.length)} active risk${D.risks.length!==1?'s':''} on the register:<ul>${D.risks.map(r=>`<li><span class="li-dot">${r.level==='HIGH'?'🔴':r.level==='MEDIUM'?'🟡':'🟢'}</span><b>${r.title}</b> (score ${r.score}/10) — owned by ${r.owner}</li>`).join('')}</ul>${high.length?`<br>The highest priority is <b>${high[0].title}</b>. Mitigation: ${high[0].mitigation}.`:''}`;
+  }
+
+  // HEADCOUNT
+  if(has('headcount','how many people','how many employ','total staff','total employ','workforce size','team size')){
+    return `Total headcount is ${M(W.total)} active employees. This month: ${M('+'+W.newHires)} new hires, ${M(W.departures)} departure${W.departures!==1?'s':''} (net ${W.newHires-W.departures>=0?'+':''}${W.newHires-W.departures}). Attrition rate is ${M(W.attrition+'%')}.`;
+  }
+
+  // CAPACITY / OVERLOAD
+  if(has('overload','capacity','utiliz','busy','stretched','workload','overworked')){
+    const over=D.departments.filter(d=>d.utilization>=90).sort((a,b)=>b.utilization-a.utilization);
+    const high=D.departments.filter(d=>d.utilization>=75&&d.utilization<90);
+    const low=D.departments.filter(d=>d.utilization<50);
+    let r='';
+    if(over.length) r+=`⚠ ${over.map(d=>`<b>${d.name}</b> (${d.utilization}%)`).join(', ')} ${over.length>1?'are':'is'} overloaded. `;
+    if(high.length) r+=`${high.map(d=>d.name+' ('+d.utilization+'%)').join(', ')} ${high.length>1?'are':'is'} running high. `;
+    if(low.length) r+=`<br>${low.map(d=>d.name).join(', ')} ${low.length>1?'have':'has'} spare capacity${over.length?' — you could rebalance work here.':'.'}`;
+    return r||`All departments are operating within healthy capacity ranges.`;
+  }
+
+  // DEPARTMENTS / HEALTH
+  if(has('department','dept','health','rag','status summary','how are we','overview','team')){
+    const g=D.departments.filter(d=>d.rag==='GREEN').length,a=D.departments.filter(d=>d.rag==='AMBER').length,r2=D.departments.filter(d=>d.rag==='RED').length;
+    const attention=D.departments.filter(d=>d.rag!=='GREEN');
+    let r=`Across ${M(D.departments.length)} departments: ${M(g+' green')}, ${M(a+' amber')}${r2?', '+M(r2+' red'):''}.`;
+    if(attention.length) r+=`<br>Needs attention:<ul>${attention.map(d=>`<li><span class="li-dot">${d.rag==='AMBER'?'🟡':'🔴'}</span><b>${d.name}</b> — tasks at ${d.tasksPct}%, utilization ${d.utilization}%</li>`).join('')}</ul>`;
+    else r+=` Everything is healthy.`;
+    return r;
+  }
+
+  // HIRING
+  if(has('hir','recruit','candidate','open role','vacanc','pipeline','offer')){
+    const h=D.hiring;
+    return `Recruitment: ${M(h.openRoles+' open roles')} with ${M(h.pipeline.reduce((s,p)=>s+p.count,0)+' candidates')} in the pipeline. ${M(h.offersPending+' offers')} are pending, average time-to-hire is ${M(h.avgDays+' days')}, and conversion rate is ${M(h.conversionPct+'%')}.`;
+  }
+
+  // IT / SYSTEMS
+  if(has('system','it ','uptime','server','network','ticket','backup','cyber','security')){
+    const tickets=D.it.find(x=>x.name.toLowerCase().includes('ticket'));
+    const alerts=D.it.find(x=>x.name.toLowerCase().includes('alert'));
+    return `Systems are operating normally. ${tickets?`There ${tickets.value==='1'?'is':'are'} ${M(tickets.value)} open IT ticket${tickets.value!=='1'?'s':''}`:''}${alerts?` and ${M(alerts.value)} critical alert${alerts.value!=='1'?'s':''}`:''}. All core services are operational and backups are current.`;
+  }
+
+  // EVENTS
+  if(has('event','calendar','upcoming','schedule','meeting','holiday','deadline')){
+    return `Upcoming events:<ul>${D.events.slice(0,5).map(e=>`<li><span class="li-dot">📅</span><b>${e.title}</b> — ${e.month} ${e.day} (${e.dept})</li>`).join('')}</ul>`;
+  }
+
+  // SUMMARY / BRIEF
+  if(has('summary','brief','overview','snapshot','everything','status','how is everything','catch me up','rundown')){
+    const sp=pct(F.budgetSpent,F.budgetTotal);
+    const urg=D.decisions.filter(d=>d.priority==='URGENT').length;
+    const overdueM=D.missions.filter(m=>m.status==='OVERDUE').length;
+    return `Here's your executive snapshot:<ul>
+      <li><span class="li-dot">💰</span>Budget ${M(sp+'%')} used, ${M(F.currency+' '+fmt(F.budgetTotal-F.budgetSpent))} left</li>
+      <li><span class="li-dot">👥</span>${M(W.total)} staff · ${M(W.onSite)} on-site · ${M(W.attendance+'%')} attendance</li>
+      <li><span class="li-dot">✅</span>Tasks ${M(pct(D.tasks.completed,D.tasks.total)+'%')} done · ${M(D.tasks.blocked+' blocked')} · ${M(D.tasks.overdue+' overdue')}</li>
+      <li><span class="li-dot">⚖️</span>${M(D.decisions.length)} decisions pending${urg?` (${urg} urgent)`:''}</li>
+      <li><span class="li-dot">⚠️</span>${M(D.risks.length)} active risks · ${M(D.missions.length+' on mission')}${overdueM?` (${overdueM} overdue)`:''}</li>
+    </ul>${urg||overdueM||D.tasks.blocked?`<b>Priorities:</b> ${[urg?urg+' urgent approvals':'',overdueM?overdueM+' overdue missions':'',D.tasks.blocked?D.tasks.blocked+' blocked tasks':''].filter(Boolean).join(', ')}.`:'Everything looks on track.'}`;
+  }
+
+  // REVENUE / CUSTOMERS
+  if((has('revenue','mrr','arr','client','customer','sales','growth','churn','nps','recurring'))&&D.revenue&&D.revenue.enabled){
+    const R=D.revenue;
+    if(has('client','customer','churn','nps')){
+      return `You have ${M(R.totalClients+' clients')}. This month: ${M('+'+R.newClients+' new')}, ${M(R.churnedClients+' churned')} (net ${R.newClients-R.churnedClients>=0?'+':''}${R.newClients-R.churnedClients}). Customer NPS is ${M(R.nps)}.${R.topClients?` Top account: <b>${R.topClients[0].name}</b> at ${R.currency} ${fmt(R.topClients[0].value)}.`:''}`;
+    }
+    const mp=pct(R.mrr,R.mrrTarget);
+    return `Monthly recurring revenue is ${M(R.currency+' '+fmt(R.mrr))} — ${M(mp+'%')} of the ${M(R.currency+' '+fmt(R.mrrTarget))} target. Annualized that's ${M(R.currency+' '+fmt(R.arr))} (ARR). Pipeline stands at ${M(R.currency+' '+fmt(R.pipeline))}, with ${M(R.currency+' '+fmt(R.wonThisMonth))} won this month.`;
+  }
+
+  // FALLBACK
+  return `I'm not sure I caught that. I can help with <b>budget</b>, <b>headcount</b>, <b>tasks</b>, <b>missions</b>, <b>decisions</b>, <b>risks</b>, <b>departments</b>, <b>hiring</b>, or <b>systems</b>. Try one of the suggestions below, or ask for a "summary".`;
+}
+applyConfig();
+</script></body></html>

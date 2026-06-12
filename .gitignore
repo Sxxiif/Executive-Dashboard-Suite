@@ -1,0 +1,39 @@
+# Operating System
+
+.DS_Store
+Thumbs.db
+
+# IDE
+
+.vscode/
+.idea/
+
+# Logs
+
+*.log
+
+# Temporary files
+
+temp/
+tmp/
+
+# Environment
+
+.env
+
+# Cache
+
+.cache/
+
+# Build output
+
+dist/
+build/
+
+# Excel temporary files
+
+~$*.xlsx
+
+# Node modules
+
+node_modules/
